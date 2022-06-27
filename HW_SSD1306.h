@@ -11,8 +11,9 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 // 20 * 4 texts
-#define TEXT_WIDTH 6 // Text width, in pixels
-#define TEXT_HEIGHT 16 // Text height, in pixels
+#define TEXT_WIDTH 5 // Text width, in pixels
+#define TEXT_HEIGHT 7 // Text height, in pixels
+#define TEXT_PAD 1
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 // The pins for I2C are defined by the Wire-library. 
@@ -84,7 +85,7 @@ void testrect(void){
 void interruptButton(){
   display.clearDisplay();
   int16_t x_num = 2;
-  int16_t y_num = 3;
+  int16_t y_num = 2;
   int16_t pad = 3;
   int16_t h = (display.height()-pad)/y_num-pad;
   int16_t w = (display.width()-pad)/x_num-pad;
@@ -130,32 +131,37 @@ void interruptButton(){
 //   delay(1);
 // }
 
-#include "GUI_elements.h"
+// #include "/Users/leedongyeop/Downloads/kiduck_sw/GUI_elements.h"
 void interruptButton2(){
   display.clearDisplay();
   int16_t x_num = 2;
   int16_t y_num = 3;
   int16_t pad = 3;
-  int16_t h = (display.height()-pad)/y_num-pad;
-  int16_t w = (display.width()-pad)/x_num-pad;
-  div = DIV(SCREEN_WIDTH, SCREEN_HEIGHT, x_num, y_num, pad)
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, x_num, y_num, pad);
   
 
   display.drawRect(div.position(0, DIV_WIDTH_DIRECTION),
-                   div.position(2, DIV_HEIGHT_DIRECTION), w, h,SSD1306_WHITE);
+                   div.position(-1, DIV_HEIGHT_DIRECTION),
+                   div.sect_width,
+                   div.sect_height,
+                   SSD1306_WHITE);
+                   
   display.fillRect(div.position(1, DIV_WIDTH_DIRECTION),
-                   div.position(2, DIV_HEIGHT_DIRECTION), w, h,SSD1306_WHITE);
+                   div.position(-1, DIV_HEIGHT_DIRECTION),
+                   div.sect_width,
+                   div.sect_height,
+                   SSD1306_WHITE);
   
   display.setTextSize(1); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(10, 0);
   display.println(F("hi"));
-  display.setCursor(div.text_center_pos(5*TEXT_WIDTH, 0, DIV_WIDTH_DIRECTION),
-                    div.text_center_pos(TEXT_HEIGHT, 2, DIV_HEIGHT_DIRECTION));
+  display.setCursor(div.text_center_pos(5*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_WIDTH_DIRECTION),
+                    div.text_center_pos(TEXT_HEIGHT, -1, DIV_HEIGHT_DIRECTION));
   display.print(F("enter"));
   display.setTextColor(SSD1306_BLACK);
-  display.setCursor(div.text_center_pos(6*TEXT_WIDTH, 1, DIV_WIDTH_DIRECTION),
-                  div.text_center_pos(TEXT_HEIGHT, 2, DIV_HEIGHT_DIRECTION));
+  display.setCursor(div.text_center_pos(6*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 1, DIV_WIDTH_DIRECTION),
+                  div.text_center_pos(TEXT_HEIGHT, -1, DIV_HEIGHT_DIRECTION));
   display.println(F("delete"));
   
   display.display();

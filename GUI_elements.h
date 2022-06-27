@@ -27,10 +27,9 @@ protected:
     int width, height;
     int width_div, height_div;
     int padding;
-
-    int sect_width, sect_height;
-
+    
 public:
+    int sect_width, sect_height;
     Div(int width, int height, int width_div, int height_div, int padding){
         this->width = width;
         this->height = height;
@@ -38,8 +37,8 @@ public:
         this->height_div = height_div;
         this->padding = padding;
 
-        this->sect_width = width / width_div;
-        this->sect_height = height / height_div;
+        this->sect_width = (width-padding) / width_div - padding;
+        this->sect_height = (height-padding) / height_div - padding;
     }
 
     // position of a section
@@ -47,7 +46,7 @@ public:
         // if direction: width, elif !direction: height
         int size = (direction)?this->width:this->height;
         int div = (direction)?this->width_div:this->height_div;
-        return this->padding + (size - this->padding) * num / div;
+        return this->padding + (size - this->padding) * (num + ((num<0)?div:0)) / div;
     }
 
     // position of a text in center of a section
@@ -55,8 +54,7 @@ public:
     int text_center_pos(int text_size, int num, bool direction){
         // if direction: width, elif !direction: height
         int sect_size = (direction)?this->sect_width:this->sect_height;
-        int inner_pos = (sect_size - sect_size) / 2;
-        return position(num, direction) + inner_pos;
+        return position(num, direction) + (sect_size - text_size) / 2;
     }
     void draw();
 };
@@ -193,4 +191,3 @@ public:
     // does some action when list element selected
     void select() {this->actions[this->curr]();}
 };
-
