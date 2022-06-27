@@ -1,34 +1,83 @@
 #include <string>
 #include <vector>
 
-
-// for OLED screen
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-
 using namespace std;
 
 class UI_element{
 protected:
-    vector<int> size;
-    vector<int> position;
+    int width, height;
+    int x_pos, y_pos;
 public:
     void draw();
 };
 
+// class Div{
+// protected:
+//     vector<UI_element> elements;
+// public:
+//     void draw();
+// };
+
+
+#define DIV_WIDTH_DIRECTION true
+#define DIV_HEIGHT_DIRECTION false
+
 class Div{
 protected:
-    vector<UI_element> elements;
+    int width, height;
+    int width_div, height_div;
+    int padding;
+
+    int sect_width, sect_height;
+
 public:
+    Div(int width, int height, int width_div, int height_div, int padding){
+        this->width = width;
+        this->height = height;
+        this->width_div = width_div;
+        this->height_div = height_div;
+        this->padding = padding;
+
+        this->sect_width = width / width_div;
+        this->sect_height = height / height_div;
+    }
+
+    // position of a section
+    int position(int num, bool direction){
+        // if direction: width, elif !direction: height
+        int size = (direction)?this->width:this->height;
+        int div = (direction)?this->width_div:this->height_div;
+        return this->padding + (size - this->padding) * num / div;
+    }
+
+    // position of a text in center of a section
+    // int text_size : text width or height in pixels
+    int text_center_pos(int text_size, int num, bool direction){
+        // if direction: width, elif !direction: height
+        int sect_size = (direction)?this->sect_width:this->sect_height;
+        int inner_pos = (sect_size - sect_size) / 2;
+        return position(num, direction) + inner_pos;
+    }
     void draw();
+};
+
+class TextDiv: public Div{
+
 };
 
 class Screen{
 protected:
     vector<Div> divs;
+    
 public:
+    Screen(){
+        
+    }
     void draw(){
         
+    }
+    void controls(){
+
     }
 };
 
@@ -37,9 +86,11 @@ class Texts : public UI_element{
 protected:
     string text;
 public:
-    Texts(vector<int> size, vector<int> position, string text){
-        this->size = size;
-        this->position = position;
+    Texts(int width, int height, int x_pos, int y_pos, string text){
+        this->width = width;
+        this->height = height;
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
         this->text = text;
     }
 };
@@ -50,9 +101,11 @@ protected:
     bool pressed;
 
 public:
-    ToggleButton(vector<int> size, vector<int> position, string name){
-        this->size = size;
-        this->position = position;
+    ToggleButton(int width, int height, int x_pos, int y_pos, string name){
+        this->width = width;
+        this->height = height;
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
         this->name = name;
         this->pressed = false;
     }
@@ -68,9 +121,11 @@ protected:
     string text;
     bool pressed;
 public:
-    TextBox(vector<int> size, vector<int> position){
-        this->size = size;
-        this->position = position;
+    TextBox(int width, int height, int x_pos, int y_pos){
+        this->width = width;
+        this->height = height;
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
         this->text = "";
     }
     void addText(char add) {this->text.push_back(add);}
@@ -91,9 +146,11 @@ protected:
     string *texts;  // list of text on the list
     void (**actions)(); // list of functions --------------> to be implemented
 public:
-    List(vector<int> size, vector<int> position, int length, int visible_len, string* texts, void (**actions)()){
-        this->size = size;
-        this->position = position;
+    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string* texts, void (**actions)()){
+        this->width = width;
+        this->height = height;
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
 
         this->length = length;
         this->visible_len = visible_len;
@@ -105,7 +162,7 @@ public:
         this->actions = actions;
     }
 
-    int moveUp(){
+    int moveBackward(){
         // moves cursor if cursor isn't at the top of the screen
         if(this->cursor_pos>0){
             this->cursor_pos--;
@@ -119,7 +176,7 @@ public:
         return 0;
     }
 
-    int moveDown(){
+    int moveForward(){
         // moves cursor if cursor isn't at the bottom of the screen
         if(this->cursor_pos<this->visible_len-1){
             this->cursor_pos++;
@@ -136,3 +193,4 @@ public:
     // does some action when list element selected
     void select() {this->actions[this->curr]();}
 };
+
