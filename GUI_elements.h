@@ -23,6 +23,13 @@ public:
 #define DIV_HEIGHT_DIRECTION false
 
 class Div{
+    
+/*
+    Div class calculates the position of a divided section of a screen
+    if given a size of the screen and desired number of divisions
+    It can also account for padding between sections
+*/
+
 protected:
     int width, height;
     int width_div, height_div;
@@ -56,7 +63,6 @@ public:
         int sect_size = (direction)?this->sect_width:this->sect_height;
         return position(num, direction) + (sect_size - text_size) / 2;
     }
-    void draw();
 };
 
 class TextDiv: public Div{
