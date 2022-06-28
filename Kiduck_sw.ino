@@ -32,18 +32,19 @@ void cleartest(){
     digitalWrite(LED_BUILTIN, LOW);
   }
   screen = (++screen)%3;
-  switch(screen){
-    case 0:
-      testrect();
-      break;
-    case 1:
-      interruptButton();
-      break;
-    case 2:
-      interruptButton2();
-      break;
-    default:
-      testrect();
-  }
+  // switch(screen){
+  //   case 0:
+  //     testrect();
+  //     break;
+  //   case 1:
+  //     interruptButton();
+  //     break;
+  //   case 2:
+  //     interruptButton2();
+  //     break;
+  //   default:
+  //     testrect();
+  // }
+  brect(screen);
   delay(100);
 }

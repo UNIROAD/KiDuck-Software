@@ -48,6 +48,30 @@ void SSD1306_Setup(){
     display.clearDisplay();
 }
 
+void sbutton(bool selected, Div div, int x_num, int y_num, String text){
+  if(selected){
+   display.fillRect(div.position(x_num, DIV_WIDTH_DIRECTION),
+                   div.position(y_num, DIV_HEIGHT_DIRECTION),
+                   div.sect_width,
+                   div.sect_height,
+                   SSD1306_WHITE);
+  }
+  else{
+   display.drawRect(div.position(x_num, DIV_WIDTH_DIRECTION),
+                 div.position(y_num, DIV_HEIGHT_DIRECTION),
+                 div.sect_width,
+                 div.sect_height,
+                 SSD1306_WHITE);
+  }
+  display.setTextSize(1); // Draw 1:1-scale text
+  display.setTextColor((selected)?SSD1306_BLACK:SSD1306_WHITE);
+  display.setCursor(div.text_center_pos(text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, x_num, DIV_WIDTH_DIRECTION),
+                    div.text_center_pos(TEXT_HEIGHT, y_num, DIV_HEIGHT_DIRECTION));
+  display.print(F(text.c_str()));
+  
+}
+
+
 /*
     Draw a single pixel in white
     
@@ -58,138 +82,23 @@ void SSD1306_Setup(){
 
 */
 
-void testrect(void){
-  display.clearDisplay();
-  int16_t x_num = 2;
-  int16_t y_num = 3;
-  int16_t pad = 3;
-  int16_t h = (display.height()-pad)/y_num-pad;
-  int16_t w = (display.width()-pad)/x_num-pad;
+// class ButtonDisplay{
+// protected:
+// };
 
-  for(int16_t i=0;i<x_num;i++){
-    display.drawRect(pad+i*(w+pad), pad+(y_num-1)*(h+pad), w, h,SSD1306_WHITE);
-  }
+
+void brect(int num){
+  display.clearDisplay();
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 2, 3, 3);
+  
+  sbutton((bool)(num%2), div, 0, -1, "enter");
+  sbutton((bool)(num/2), div, 1, -1, "delete");
   
   display.setTextSize(1); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(10, 0);
   display.println(F("hi"));
-  display.setCursor(20, 0);
-  display.println(F("\n\n\n\n\n\n   enter     delete"));
- 
-  display.display();
-  delay(1);
-
-}
-
-void interruptButton(){
-  display.clearDisplay();
-  int16_t x_num = 2;
-  int16_t y_num = 2;
-  int16_t pad = 3;
-  int16_t h = (display.height()-pad)/y_num-pad;
-  int16_t w = (display.width()-pad)/x_num-pad;
-
-  display.fillRect(pad, pad+(y_num-1)*(h+pad), w, h,SSD1306_WHITE);
-  display.drawRect(pad+(w+pad), pad+(y_num-1)*(h+pad), w, h,SSD1306_WHITE);
-  
-  display.setTextSize(1); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("hi"));
-  display.setCursor(20, 0);
-  display.setTextColor(SSD1306_BLACK);
-  display.print(F("\n\n\n\n\n\n   enter"));
-  display.setTextColor(SSD1306_WHITE);
-  display.println(F("     delete"));
   
   display.display();
   delay(1);
-}
-
-// void interruptButton2(){
-//   display.clearDisplay();
-//   int16_t x_num = 2;
-//   int16_t y_num = 3;
-//   int16_t pad = 3;
-//   int16_t h = (display.height()-pad)/y_num-pad;
-//   int16_t w = (display.width()-pad)/x_num-pad;
-
-//   display.drawRect(pad, pad+(y_num-1)*(h+pad), w, h,SSD1306_WHITE);
-//   display.fillRect(pad+(w+pad), pad+(y_num-1)*(h+pad), w, h,SSD1306_WHITE);
-  
-//   display.setTextSize(1); // Draw 2X-scale text
-//   display.setTextColor(SSD1306_WHITE);
-//   display.setCursor(10, 0);
-//   display.println(F("hi"));
-//   display.setCursor(20, 50);
-//   display.print(F("enter"));
-//   display.setTextColor(SSD1306_BLACK);
-//   display.println(F("     delete"));
-  
-//   display.display();
-//   delay(1);
-// }
-
-// #include "/Users/leedongyeop/Downloads/kiduck_sw/GUI_elements.h"
-void interruptButton2(){
-  display.clearDisplay();
-  int16_t x_num = 2;
-  int16_t y_num = 3;
-  int16_t pad = 3;
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, x_num, y_num, pad);
-  
-
-  display.drawRect(div.position(0, DIV_WIDTH_DIRECTION),
-                   div.position(-1, DIV_HEIGHT_DIRECTION),
-                   div.sect_width,
-                   div.sect_height,
-                   SSD1306_WHITE);
-                   
-  display.fillRect(div.position(1, DIV_WIDTH_DIRECTION),
-                   div.position(-1, DIV_HEIGHT_DIRECTION),
-                   div.sect_width,
-                   div.sect_height,
-                   SSD1306_WHITE);
-  
-  display.setTextSize(1); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("hi"));
-  display.setCursor(div.text_center_pos(5*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_WIDTH_DIRECTION),
-                    div.text_center_pos(TEXT_HEIGHT, -1, DIV_HEIGHT_DIRECTION));
-  display.print(F("enter"));
-  display.setTextColor(SSD1306_BLACK);
-  display.setCursor(div.text_center_pos(6*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 1, DIV_WIDTH_DIRECTION),
-                  div.text_center_pos(TEXT_HEIGHT, -1, DIV_HEIGHT_DIRECTION));
-  display.println(F("delete"));
-  
-  display.display();
-  delay(1);
-}
-
-
-void testdrawrect(void) {
-  display.clearDisplay();
-
-  for(int16_t i=0; i<display.height()/2; i+=2) {
-    display.drawRect(i, i, display.width()-2*i, display.height()-2*i, SSD1306_WHITE);
-    display.display(); // Update screen with each newly-drawn rectangle
-    delay(1);
-  }
-
-  delay(2000);
-}
-
-void testfillrect(void) {
-  display.clearDisplay();
-
-  for(int16_t i=0; i<display.height()/8; i+=3) {
-    // The INVERSE color is used so rectangles alternate white/black
-    display.fillRect(i, i, display.width()-i*2, display.height()-i*2, SSD1306_INVERSE);
-    display.display(); // Update screen with each newly-drawn rectangle
-    delay(1);
-  }
-
-  delay(2000);
 }
