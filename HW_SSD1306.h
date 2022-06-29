@@ -48,19 +48,20 @@ void SSD1306_Setup(){
     display.clearDisplay();
 }
 
+
 void sbutton(bool selected, Div div, int x_num, int y_num, String text){
   if(selected){
    display.fillRect(div.position(x_num, DIV_WIDTH_DIRECTION),
                    div.position(y_num, DIV_HEIGHT_DIRECTION),
-                   div.sect_width,
-                   div.sect_height,
+                   div.getSectWidth(),
+                   div.getSectHeight(),
                    SSD1306_WHITE);
   }
   else{
    display.drawRect(div.position(x_num, DIV_WIDTH_DIRECTION),
                  div.position(y_num, DIV_HEIGHT_DIRECTION),
-                 div.sect_width,
-                 div.sect_height,
+                 div.getSectWidth(),
+                 div.getSectHeight(),
                  SSD1306_WHITE);
   }
   display.setTextSize(1); // Draw 1:1-scale text
@@ -70,6 +71,7 @@ void sbutton(bool selected, Div div, int x_num, int y_num, String text){
   display.print(F(text.c_str()));
   
 }
+
 
 
 /*
@@ -86,8 +88,8 @@ void sbutton(bool selected, Div div, int x_num, int y_num, String text){
 // protected:
 // };
 
-
-void brect(int num){
+// function that displays set of rectangle Button
+void rectButtonSetDisplay(int num){
   display.clearDisplay();
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 2, 3, 3);
   
@@ -101,4 +103,54 @@ void brect(int num){
   
   display.display();
   delay(1);
+}
+
+// function that displays List screen
+void listDisplay(List list){
+  display.clearDisplay();
+  
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 1, list.getVisibleLen(), 3)
+  string temp_text;
+
+  display.fillRect(div.position(0, DIV_WIDTH_DIRECTION),
+                  div.position(list.getCursorPos(), DIV_HEIGHT_DIRECTION),
+                  div.getSectWidth(),
+                  div.getSectHeight(),
+                  SSD1306_WHITE);
+
+  display.setTextSize(1); // Draw 1:1-scale text
+
+  for(int i=0;i<list.getVisibleLen();i++){
+    temp_text = list.getVisibleText(i);
+
+    display.setTextColor((i==list.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
+    display.setCursor(div.text_center_pos(temp_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_WIDTH_DIRECTION),
+                      div.text_center_pos(TEXT_HEIGHT, i, DIV_HEIGHT_DIRECTION));
+    display.print(F(temp_text.c_str()));
+  }
+  display.display();
+  delay(1);
+}
+
+// string length less than 2 is recommended
+// draws on top of whatever is on the screen
+void navigationBarDisplay(string str1, string str2, string str3, string str4){
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 4, 2)
+  
+  display.fillRoundRect(div.position(0, DIV_WIDTH_DIRECTION),
+                        div.position(-1, DIV_HEIGHT_DIRECTION),
+                        div.getSectWidth(),
+                        div.getSectHeight(),
+                        div.getSectHeight()/2,  // radius of round edge
+                        SSD1306_WHITE);
+  
+  div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 4, 4, 2)
+
+  for(int i=0;i<4;i++){
+    display.drawLine(div.position(1, DIV_WIDTH_DIRECTION),
+                     div.position(-1, DIV_HEIGHT_DIRECTION) + 1,
+                     div.position(1, DIV_WIDTH_DIRECTION),
+                     div.position(-1, DIV_HEIGHT_DIRECTION) + div.getSectHeight() - 1, 
+                     SSD1306_WHITE);
+  }
 }
