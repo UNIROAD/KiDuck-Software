@@ -48,6 +48,10 @@ public:
         this->sect_height = (height-padding) / height_div - padding;
     }
 
+    // getters
+    int getSectWidth(){return this->sect_width;}
+    int getSectHeight(){return this->sect_height;}
+
     // position of a section
     int position(int num, bool direction){
         // if direction: width, elif !direction: height
@@ -165,6 +169,12 @@ public:
         this->texts = texts;
         this->actions = actions;
     }
+
+    //getters
+    int getVisibleLen(){return this->visible_len;}
+    int getCursorPos(){return this->cursor_pos;}
+    int getListPos(){return this->list_pos;}
+    string getVisibleText(int idxdiff){return this->texts[this->list_pos + idxdiff];}
 
     int moveBackward(){
         // moves cursor if cursor isn't at the top of the screen
