@@ -48,8 +48,23 @@ void SSD1306_Setup(){
     display.clearDisplay();
 }
 
+/*
+    Draw a single pixel in white
+    
+    for(int i=10;i<70;i++){
+        display.drawPixel(10, i, SSD1306_WHITE);
+    }
 
-void sbutton(bool selected, Div div, int x_num, int y_num, String text){
+
+*/
+
+// class ButtonDisplay{
+// protected:
+// };
+
+
+// function that displays set of rectangle Button
+void _sbutton(bool selected, Div div, int x_num, int y_num, String text){
   if(selected){
    display.fillRect(div.position(x_num, DIV_WIDTH_DIRECTION),
                    div.position(y_num, DIV_HEIGHT_DIRECTION),
@@ -73,28 +88,12 @@ void sbutton(bool selected, Div div, int x_num, int y_num, String text){
 }
 
 
-
-/*
-    Draw a single pixel in white
-    
-    for(int i=10;i<70;i++){
-        display.drawPixel(10, i, SSD1306_WHITE);
-    }
-
-
-*/
-
-// class ButtonDisplay{
-// protected:
-// };
-
-// function that displays set of rectangle Button
 void rectButtonSetDisplay(int num){
   display.clearDisplay();
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 2, 3, 3);
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 2, 4, 3);
   
-  sbutton((bool)(num%2), div, 0, -1, "enter");
-  sbutton((bool)(num/2), div, 1, -1, "delete");
+  _sbutton((bool)(num%2), div, 0, -2, "enter");
+  _sbutton((bool)(num/2), div, 1, -2, "delete");
   
   display.setTextSize(1); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
@@ -104,16 +103,16 @@ void rectButtonSetDisplay(int num){
   display.display();
   delay(1);
 }
-
+int alpha=0;
 // function that displays List screen
 void listDisplay(List list){
-  display.clearDisplay();
+  Div div = Div(list.getWidth(), list.getHeight(), 1, list.getVisibleLen(), 3);
+  string vis_text;
   
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 1, list.getVisibleLen(), 3)
-  string temp_text;
-
+  display.clearDisplay();
+  alpha = (alpha+1)%3;
   display.fillRect(div.position(0, DIV_WIDTH_DIRECTION),
-                  div.position(list.getCursorPos(), DIV_HEIGHT_DIRECTION),
+                  div.position(alpha, DIV_HEIGHT_DIRECTION),//list.getCursorPos(), DIV_HEIGHT_DIRECTION),
                   div.getSectWidth(),
                   div.getSectHeight(),
                   SSD1306_WHITE);
@@ -121,12 +120,13 @@ void listDisplay(List list){
   display.setTextSize(1); // Draw 1:1-scale text
 
   for(int i=0;i<list.getVisibleLen();i++){
-    temp_text = list.getVisibleText(i);
+    vis_text = list.getVisibleText(i);
 
     display.setTextColor((i==list.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
-    display.setCursor(div.text_center_pos(temp_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_WIDTH_DIRECTION),
+    display.setCursor(div.text_center_pos(vis_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_WIDTH_DIRECTION),
                       div.text_center_pos(TEXT_HEIGHT, i, DIV_HEIGHT_DIRECTION));
-    display.print(F(temp_text.c_str()));
+    //display.print(F(vis_text.c_str()));
+    delay(1);
   }
   display.display();
   delay(1);
@@ -135,8 +135,9 @@ void listDisplay(List list){
 // string length less than 2 is recommended
 // draws on top of whatever is on the screen
 void navigationBarDisplay(string str1, string str2, string str3, string str4){
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 4, 2)
-  
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 4, 2);
+  string temp_text[4] = {str1, str2, str3, str4};
+
   display.fillRoundRect(div.position(0, DIV_WIDTH_DIRECTION),
                         div.position(-1, DIV_HEIGHT_DIRECTION),
                         div.getSectWidth(),
@@ -144,13 +145,61 @@ void navigationBarDisplay(string str1, string str2, string str3, string str4){
                         div.getSectHeight()/2,  // radius of round edge
                         SSD1306_WHITE);
   
-  div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 4, 4, 2)
+  div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 4, 4, 2);
+
+  display.setTextSize(1); // Draw 1:1-scale text
+  display.setTextColor(SSD1306_BLACK);
 
   for(int i=0;i<4;i++){
-    display.drawLine(div.position(1, DIV_WIDTH_DIRECTION),
+    display.drawLine(div.position(i%3+1, DIV_WIDTH_DIRECTION),
                      div.position(-1, DIV_HEIGHT_DIRECTION) + 1,
-                     div.position(1, DIV_WIDTH_DIRECTION),
-                     div.position(-1, DIV_HEIGHT_DIRECTION) + div.getSectHeight() - 1, 
-                     SSD1306_WHITE);
+                     div.position(i%3+1, DIV_WIDTH_DIRECTION),
+                     div.position(-1, DIV_HEIGHT_DIRECTION) + div.getSectHeight() - 1,
+                     SSD1306_BLACK);
+    delay(1);
+    
+    display.setCursor(div.text_center_pos(temp_text[i].length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, i, DIV_WIDTH_DIRECTION),
+                      div.text_center_pos(TEXT_HEIGHT, -1, DIV_HEIGHT_DIRECTION));
+    display.print(F(temp_text[i].c_str()));
+    delay(1);
   }
+  display.display();
+  delay(1);
+}
+
+
+
+/*
+
+
+
+*/
+
+List listConstructTest(){
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 4, 3);
+  string *temp_str = (string*)malloc(sizeof(string)*5);
+  string temptemp[5] = {"hello",
+                        "goodbye",
+                        "this",
+                        "isn\'t",
+                        "great"};
+  for(int i=0;i<5;i++){
+    temp_str[i] = temptemp[i];
+  }
+            
+  List list = List(SCREEN_WIDTH, div.multiSectSize(3, DIV_HEIGHT_DIRECTION),
+                   0, 0, 5, 3, temp_str);
+  return list;
+}
+
+
+
+List buttonMapList(List list){
+  if(fall_edge(2, &prev2, &curr2)){
+    list.moveBackward();
+  }
+  else if(fall_edge(3, &prev3, &curr3)){
+    list.moveForward();
+  }
+  return list;
 }
