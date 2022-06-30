@@ -1,5 +1,4 @@
 #include <string>
-#include <vector>
 
 using namespace std;
 
@@ -8,6 +7,11 @@ protected:
     int width, height;
     int x_pos, y_pos;
 public:
+    // getters
+    int getWidth(){return this->width;}
+    int getHeight(){return this->height;}
+    int getXPos(){return this->x_pos;}
+    int getYPos(){return this->y_pos;}
     void draw();
 };
 
@@ -60,6 +64,13 @@ public:
         return this->padding + (size - this->padding) * (num + ((num<0)?div:0)) / div;
     }
 
+    // width or height of multiple sections
+    int multiSectSize(int len, bool direction){
+        // if direction: width, elif !direction: height
+        int sect_size = (direction)?this->sect_width:this->sect_height;
+        return (sect_size+this->padding) * len + this->padding;
+    }
+
     // position of a text in center of a section
     // int text_size : text width or height in pixels
     int text_center_pos(int text_size, int num, bool direction){
@@ -75,7 +86,7 @@ class TextDiv: public Div{
 
 class Screen{
 protected:
-    vector<Div> divs;
+    Div *divs;
     
 public:
     Screen(){
@@ -154,7 +165,7 @@ protected:
     string *texts;  // list of text on the list
     void (**actions)(); // list of functions --------------> to be implemented
 public:
-    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string* texts, void (**actions)()){
+    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string* texts){ //}, void (**actions)()){
         this->width = width;
         this->height = height;
         this->x_pos = x_pos;
@@ -167,13 +178,14 @@ public:
         this->curr = 0;
 
         this->texts = texts;
-        this->actions = actions;
+        //this->actions = actions;
     }
 
     //getters
     int getVisibleLen(){return this->visible_len;}
     int getCursorPos(){return this->cursor_pos;}
     int getListPos(){return this->list_pos;}
+
     string getVisibleText(int idxdiff){return this->texts[this->list_pos + idxdiff];}
 
     int moveBackward(){
@@ -205,5 +217,5 @@ public:
     }
 
     // does some action when list element selected
-    void select() {this->actions[this->curr]();}
+    //void select() {this->actions[this->curr]();}
 };
