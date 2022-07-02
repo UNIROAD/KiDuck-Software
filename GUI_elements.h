@@ -25,8 +25,13 @@ public:
 
 #define DIV_WIDTH_DIRECTION true
 #define DIV_HEIGHT_DIRECTION false
+#define DIV_LEFT_ALLIGNMENT -1
+#define DIV_CENTER_ALLIGNMENT 0
+#define DIV_RIGHT_ALLIGNEMENT 1
+#define DIV_PADDED true
+#define DIV_PADLESS false
 
-class Div{
+class Div: public UI_element{
     
 /*
     Div class calculates the position of a divided section of a screen
@@ -35,15 +40,16 @@ class Div{
 */
 
 protected:
-    int width, height;
     int width_div, height_div;
     int padding;
     
 public:
     int sect_width, sect_height;
-    Div(int width, int height, int width_div, int height_div, int padding){
+    Div(int width, int height, int x_pos, int y_pos, int width_div, int height_div, int padding){
         this->width = width;
         this->height = height;
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
         this->width_div = width_div;
         this->height_div = height_div;
         this->padding = padding;
@@ -57,11 +63,13 @@ public:
     int getSectHeight(){return this->sect_height;}
 
     // position of a section
-    int position(int num, bool direction){
+    int position(int num, bool direction, bool padded){
         // if direction: width, elif !direction: height
         int size = (direction)?this->width:this->height;
+        int pos = (direction)?this->x_pos:this->y_pos;
         int div = (direction)?this->width_div:this->height_div;
-        return this->padding + (size - this->padding) * (num + ((num<0)?div:0)) / div;
+        if(padded == DIV_PADLESS) return pos + size/div * num;
+        return pos + this->padding + (size - this->padding) * (num + ((num<0)?div:0)) / div;
     }
 
     // width or height of multiple sections
@@ -71,12 +79,19 @@ public:
         return (sect_size+this->padding) * len + this->padding;
     }
 
-    // position of a text in center of a section
+    // position of a text in left/center/right allignment of a section
     // int text_size : text width or height in pixels
-    int text_center_pos(int text_size, int num, bool direction){
+    int textAllign(int text_size, int num, int allign, bool direction){
         // if direction: width, elif !direction: height
         int sect_size = (direction)?this->sect_width:this->sect_height;
-        return position(num, direction) + (sect_size - text_size) / 2;
+        
+        // left allignment
+        if(allign == DIV_LEFT_ALLIGNMENT) return position(num, direction, DIV_PADDED);
+        // center allignment
+        else if(allign == DIV_CENTER_ALLIGNMENT) return position(num, direction, DIV_PADDED) + (sect_size - text_size) / 2;
+        // right allignment
+        else if(allign == DIV_RIGHT_ALLIGNEMENT) position(num, direction, DIV_PADDED) + text_size - sect_size;
+        return 0;
     }
 };
 
@@ -152,6 +167,7 @@ public:
     void deleteAll() {this->text = "";}
 };
 
+
 class List : public UI_element {
 protected:
     int length;     // length of the list
@@ -162,10 +178,10 @@ protected:
     int list_pos;   // list number which is on the top of the screen
     int curr;       // current position of the cursor on the whole list
 
-    string *texts;  // list of text on the list
+    string **texts;  // list of text on the list
     void (**actions)(); // list of functions --------------> to be implemented
 public:
-    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string* texts){ //}, void (**actions)()){
+    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string** texts){ //}, void (**actions)()){
         this->width = width;
         this->height = height;
         this->x_pos = x_pos;
@@ -178,44 +194,41 @@ public:
         this->curr = 0;
 
         this->texts = texts;
-        //this->actions = actions;
-    }
+       //this->actions = actions;
+   }
 
-    //getters
+   //getters
     int getVisibleLen(){return this->visible_len;}
     int getCursorPos(){return this->cursor_pos;}
     int getListPos(){return this->list_pos;}
 
-    string getVisibleText(int idxdiff){return this->texts[this->list_pos + idxdiff];}
-
-    int moveBackward(){
+    string getVisibleText(int idxdiff){return *(this->texts[this->list_pos + idxdiff]);}
+    void moveBackward(){
         // moves cursor if cursor isn't at the top of the screen
         if(this->cursor_pos>0){
             this->cursor_pos--;
-            return --(this->curr);
+            this->curr--;
         }
         // moves list if cursor is at the top of the screen
         else if(this->list_pos>0){
             this->list_pos--;
-            return --(this->curr);
+            this->curr--;
         }
-        return 0;
-    }
+   }
 
-    int moveForward(){
+    void moveForward(){
         // moves cursor if cursor isn't at the bottom of the screen
         if(this->cursor_pos<this->visible_len-1){
             this->cursor_pos++;
-            return ++(this->curr);
+            this->curr++;
         }
         // moves list if cursor is at the bottom of the list
         else if(this->list_pos<this->length-this->visible_len){
             this->list_pos++;
-            return ++(this->curr);
+            this->curr++;
         }
-        return this->length-1;
     }
 
-    // does some action when list element selected
-    //void select() {this->actions[this->curr]();}
+   // does some action when list element selected
+   //void select() {this->actions[this->curr]();}
 };
