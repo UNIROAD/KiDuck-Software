@@ -26,27 +26,6 @@
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// void SSD1306_Setup(){
-//     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-//     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-//         Serial.println(F("SSD1306 allocation failed"));
-//         for(;;); // Don't proceed, loop forever
-//     }
-
-//     // Show initial display buffer contents on the screen --
-//     // the library initializes this with an Adafruit splash screen.
-//     // Show the display buffer on the screen. You MUST call display() after
-//     // drawing commands to make them visible on screen!  
-//     display.display();
-//     delay(2000); // Pause for 2 seconds
-
-//     // display.display() is NOT necessary after every single drawing command,
-//     // unless that's what you want...rather, you can batch up a bunch of
-//     // drawing operations and then update the screen all at once by calling
-//     // display.display(). These examples demonstrate both approaches...
-//     // Clear the buffer
-//     display.clearDisplay();
-// }
 
 void SSD1306_Setup(){
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
@@ -54,7 +33,9 @@ void SSD1306_Setup(){
         Serial.println(F("SSD1306 allocation failed"));
         for(;;); // Don't proceed, loop forever
     }
+}
 
+void startupDisplay(){
     // Show initial display buffer contents on the screen --
     // the library initializes this with an Adafruit splash screen.
     // Show the display buffer on the screen. You MUST call display() after
@@ -81,20 +62,6 @@ void SSD1306_Setup(){
     // Clear the buffer
     display.clearDisplay();
 }
-
-/*
-    Draw a single pixel in white
-    
-    for(int i=10;i<70;i++){
-        display.drawPixel(10, i, SSD1306_WHITE);
-    }
-
-
-*/
-
-// class ButtonDisplay{
-// protected:
-// };
 
 
 // function that displays set of rectangle Button
@@ -137,39 +104,7 @@ void rectButtonSetDisplay(int num){
   display.display();
   delay(1);
 }
-/*
-int alpha = 0;
 
-// function that displays List screen
-void listDisplay(List list){
-  Div div = Div(list.getWidth(), list.getHeight(), 1, list.getVisibleLen(), 3);
-  string vis_text;
-  
-  display.clearDisplay();
-
-  alpha = (alpha+1)%3;
-  
-  display.fillRect(div.position(0, DIV_WIDTH_DIRECTION),
-                  div.position(alpha, DIV_HEIGHT_DIRECTION),//list.getCursorPos(), DIV_HEIGHT_DIRECTION),
-                  div.getSectWidth(),
-                  div.getSectHeight(),
-                  SSD1306_WHITE);
-
-  display.setTextSize(1); // Draw 1:1-scale text
-
-  for(int i=0;i<list.getVisibleLen();i++){
-    vis_text = list.getVisibleText(i);
-
-    display.setTextColor((i==list.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
-    display.setCursor(div.text_center_pos(vis_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_WIDTH_DIRECTION),
-                      div.text_center_pos(TEXT_HEIGHT, i, DIV_HEIGHT_DIRECTION));
-    //display.print(F(vis_text.c_str()));
-    delay(1);
-  }
-  display.display();
-  delay(1);
-}
-*/
 
 // string length less than 2 is recommended
 // draws on top of whatever is on the screen
@@ -190,9 +125,9 @@ void navigationBarDisplay(string str1, string str2, string str3, string str4){
   display.setTextColor(SSD1306_BLACK);
 
   for(int i=0;i<4;i++){
-    display.drawLine(div.position(i%3+1, DIV_WIDTH_DIRECTION, DIV_PADDED),
+    display.drawLine(div.position(i%3+1, DIV_WIDTH_DIRECTION, DIV_PADLESS),
                      div.position(-1, DIV_HEIGHT_DIRECTION, DIV_PADDED) + 1,
-                     div.position(i%3+1, DIV_WIDTH_DIRECTION, DIV_PADDED),
+                     div.position(i%3+1, DIV_WIDTH_DIRECTION, DIV_PADLESS),
                      div.position(-1, DIV_HEIGHT_DIRECTION, DIV_PADDED) + div.getSectHeight() - 1,
                      SSD1306_BLACK);
     delay(1);
@@ -206,6 +141,46 @@ void navigationBarDisplay(string str1, string str2, string str3, string str4){
   delay(1);
 }
 
+
+// function that displays List screen
+void listDisplay(List* list){
+  Div div = Div((*list).getWidth(), (*list).getHeight(), 
+                (*list).getXPos(), (*list).getYPos(), 
+                1, (*list).getVisibleLen(), 2);
+  string vis_text;
+
+  display.clearDisplay();
+
+  display.fillRect(div.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
+                  div.position((*list).getCursorPos(), DIV_HEIGHT_DIRECTION, DIV_PADDED),
+                  div.getSectWidth(),
+                  div.getSectHeight(),
+                  SSD1306_WHITE);
+
+  display.setTextSize(1); // Draw 1:1-scale text
+
+  for(int i=0;i<(*list).getVisibleLen();i++){
+    vis_text = (*list).getVisibleText(i);
+
+    display.setTextColor((i==(*list).getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
+    display.setCursor(div.textAllign(vis_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_LEFT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                      div.textAllign(TEXT_HEIGHT, i, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
+    display.print(F(vis_text.c_str()));
+    delay(1);
+  }
+
+  // Title
+  display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(2, 2);
+  display.print(F(" Settings"));
+
+  navigationBarDisplay("^", "v", "=", "o");
+
+  display.display();
+  delay(1);
+}
 
 
 /*
@@ -234,14 +209,15 @@ List listConstructTest(){
 }
 
 
-/*
-List buttonMapList(List list){
-  if(fall_edge(2, &prev2, &curr2)){
-    list.moveBackward();
+
+bool buttonMapList(List* list){
+  if(fall_edge(5, &prev5, &curr5)){
+    (*list).moveBackward();
+    return true;
   }
-  else if(fall_edge(3, &prev3, &curr3)){
-    list.moveForward();
+  else if(fall_edge(4, &prev4, &curr4)){
+    (*list).moveForward();
+    return true;
   }
-  return list;
+  return false;
 }
-*/
