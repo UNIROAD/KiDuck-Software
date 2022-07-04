@@ -11,7 +11,7 @@
 int16_t screen = 0;
 
 List listtest = listConstructTest();
-
+Keyboard keytest = keyboardConstructTest();
 
 void setup(){
  Serial.begin(9600);
@@ -31,12 +31,42 @@ void loop(){
       listDisplay(&listtest);
     }
   }
+  if(screen==2){
+    if(buttonMapKey(&keytest)){
+      delay(1);
+      keyboardDisplay(&keytest);
+    }
+  }
   if(fall_edge(3, &prev3, &curr3)){
-    screen=(screen+1)%2;
-    if(screen) listDisplay(&listtest);
-    else duckDisplay();
+    screen=(screen+1)%3;
+    switch(screen){
+      case 0:
+        duckDisplay();
+        break;
+      case 1:
+        listDisplay(&listtest);
+        break;
+      case 2:
+        keyboardDisplay(&keytest);
+        break;
+      default: break;
+    }
   }
 }
+
+// void loop(){
+//   if(screen==1){
+//     if(buttonMapList(&listtest)){
+//       delay(1);
+//       listDisplay(&listtest);
+//     }
+//   }
+//   if(fall_edge(3, &prev3, &curr3)){
+//     screen=(screen+1)%2;
+//     if(screen) listDisplay(&listtest);
+//     else duckDisplay();
+//   }
+// }
 
 
 //////////////////////////////////////////////////////////

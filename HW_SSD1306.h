@@ -4,6 +4,10 @@
 #define ARD
 #endif
 
+
+#ifndef HW_SSD
+#define HW_SSD
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -182,13 +186,50 @@ void listDisplay(List* list){
   delay(1);
 }
 
+void keyboardDisplay(Keyboard* keyboard){
+  Div div = Div((*keyboard).getWidth(), (*keyboard).getHeight(), 
+                (*keyboard).getXPos(), (*keyboard).getYPos(), 
+                (*keyboard).getVisibleLen(), 1, 2);
+  string vis_text;
+
+  display.clearDisplay();
+
+  display.setTextSize(1); // Draw 1:1-scale text
+
+  display.drawRoundRect(div.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
+                        div.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
+                        div.getWidth(), div.getHeight(), 3, SSD1306_WHITE);
+  
+  int cursor_width = div.getSectWidth()*2/3;
+  display.drawRoundRect(div.textAllign(cursor_width, 2, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                        div.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED)-2,
+                        cursor_width, div.getHeight()+4, 3, SSD1306_WHITE);
+
+  display.setTextColor(SSD1306_WHITE);
+
+  int len = (*keyboard).getVisibleLen();
+  for(int i=0;i<len;i++){
+    vis_text = (*keyboard).getVisibleText(i-len/2);
+
+    display.setCursor(div.textAllign(TEXT_WIDTH, i, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                      div.textAllign(TEXT_HEIGHT-4, 3, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
+    display.print(F(vis_text.c_str()));
+    delay(1);
+  }
+
+  navigationBarDisplay("<", ">", "<-", "o");
+
+  display.display();
+  delay(1);
+}
+
+
 
 /*
 
 
 
 */
-
 
 #define DUCK_HEIGHT   0x32
 #define DUCK_WIDTH    0x32
@@ -275,6 +316,21 @@ List listConstructTest(){
   return list;
 }
 
+char keytemp[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+Keyboard keyboardConstructTest(){
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
+  // char **tempkey = (char**)malloc(sizeof(char*)*26);
+
+  // for(int i=0;i<27;i++){
+  //  tempkey[i] = &(keytemp[i]);
+  // }
+            
+  Keyboard keyboard = Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
+                               0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 27, 5, keytemp);
+  return keyboard;
+}
+
 
 
 bool buttonMapList(List* list){
@@ -288,3 +344,18 @@ bool buttonMapList(List* list){
   }
   return false;
 }
+
+bool buttonMapKey(Keyboard* keyboard){
+  if(fall_edge(5, &prev5, &curr5)){
+    (*keyboard).moveBackward();
+    return true;
+  }
+  else if(fall_edge(4, &prev4, &curr4)){
+    (*keyboard).moveForward();
+    return true;
+  }
+  return false;
+}
+
+
+#endif
