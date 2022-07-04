@@ -7,6 +7,12 @@ protected:
     int width, height;
     int x_pos, y_pos;
 public:
+    UI_element(int width, int height, int x_pos, int y_pos){
+        this->width = width;
+        this->height = height;
+        this->x_pos = x_pos;
+        this->y_pos = y_pos;
+    }
     // getters
     int getWidth(){return this->width;}
     int getHeight(){return this->height;}
@@ -45,11 +51,8 @@ protected:
     
 public:
     int sect_width, sect_height;
-    Div(int width, int height, int x_pos, int y_pos, int width_div, int height_div, int padding){
-        this->width = width;
-        this->height = height;
-        this->x_pos = x_pos;
-        this->y_pos = y_pos;
+    Div(int width, int height, int x_pos, int y_pos, int width_div, int height_div, int padding)
+    : UI_element(width, height, x_pos, y_pos){
         this->width_div = width_div;
         this->height_div = height_div;
         this->padding = padding;
@@ -120,11 +123,8 @@ class Texts : public UI_element{
 protected:
     string text;
 public:
-    Texts(int width, int height, int x_pos, int y_pos, string text){
-        this->width = width;
-        this->height = height;
-        this->x_pos = x_pos;
-        this->y_pos = y_pos;
+    Texts(int width, int height, int x_pos, int y_pos, string text)
+    : UI_element(width, height, x_pos, y_pos){
         this->text = text;
     }
 };
@@ -135,11 +135,8 @@ protected:
     bool pressed;
 
 public:
-    ToggleButton(int width, int height, int x_pos, int y_pos, string name){
-        this->width = width;
-        this->height = height;
-        this->x_pos = x_pos;
-        this->y_pos = y_pos;
+    ToggleButton(int width, int height, int x_pos, int y_pos, string name)
+    : UI_element(width, height, x_pos, y_pos){
         this->name = name;
         this->pressed = false;
     }
@@ -155,11 +152,8 @@ protected:
     string text;
     bool pressed;
 public:
-    TextBox(int width, int height, int x_pos, int y_pos){
-        this->width = width;
-        this->height = height;
-        this->x_pos = x_pos;
-        this->y_pos = y_pos;
+    TextBox(int width, int height, int x_pos, int y_pos)
+    : UI_element(width, height, x_pos, y_pos){
         this->text = "";
     }
     void addText(char add) {this->text.push_back(add);}
@@ -181,7 +175,8 @@ protected:
     string **texts;  // list of text on the list
     void (**actions)(); // list of functions --------------> to be implemented
 public:
-    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string** texts){ //}, void (**actions)()){
+    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string** texts)//}, void (**actions)()){
+    : UI_element(width, height, x_pos, y_pos){ 
         this->width = width;
         this->height = height;
         this->x_pos = x_pos;
@@ -195,9 +190,9 @@ public:
 
         this->texts = texts;
        //this->actions = actions;
-   }
+    }
 
-   //getters
+    //getters
     int getVisibleLen(){return this->visible_len;}
     int getCursorPos(){return this->cursor_pos;}
     int getListPos(){return this->list_pos;}
@@ -214,7 +209,7 @@ public:
             this->list_pos--;
             this->curr--;
         }
-   }
+    }
 
     void moveForward(){
         // moves cursor if cursor isn't at the bottom of the screen
@@ -231,4 +226,35 @@ public:
 
    // does some action when list element selected
    //void select() {this->actions[this->curr]();}
+};
+
+
+class Keyboard : public UI_element {
+protected:
+    int length;     // length of the list
+    int visible_len; // number of list visible on screen
+    int curr;       // current position of the cursor on the whole list
+    char *texts;  // list of text on the keyboard
+
+public:
+    Keyboard(int width, int height, int x_pos, int y_pos, int length, int visible_len, char* texts)
+    : UI_element(width, height, x_pos, y_pos){
+        this->length = length;
+        this->visible_len = visible_len;    // odd number
+        this->curr = 0;
+        this->texts = texts;
+    }
+
+    //getters
+    int getVisibleLen(){return this->visible_len;}
+
+    char getVisibleText(int idxdiff){
+        if(0<=(this->curr + idxdiff)&&(this->curr + idxdiff)<this->length){
+            return this->texts[this->curr + idxdiff];
+        }
+        return ' ';
+    }
+
+    void moveBackward(){if(0<this->curr) this->curr--;}
+    void moveForward(){if(this->curr<this->length-2) this->curr++;}
 };
