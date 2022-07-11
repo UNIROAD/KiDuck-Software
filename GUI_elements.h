@@ -103,19 +103,9 @@ class TextDiv: public Div{
 };
 
 class Screen{
-protected:
-    Div *divs;
-    
-public:
-    Screen(){
-        
-    }
-    void draw(){
-        
-    }
-    void controls(){
-
-    }
+    virtual void draw() = 0;
+    virtual void controls() = 0;
+    virtual void buttonMap() = 0;
 };
 
 
@@ -145,20 +135,6 @@ public:
         this->pressed = !this->pressed;
         return this->pressed;
     }
-};
-
-class TextBox : public UI_element {
-protected:
-    string text;
-    bool pressed;
-public:
-    TextBox(int width, int height, int x_pos, int y_pos)
-    : UI_element(width, height, x_pos, y_pos){
-        this->text = "";
-    }
-    void addText(char add) {this->text.push_back(add);}
-    void deleteOne() {this->text.pop_back();}
-    void deleteAll() {this->text = "";}
 };
 
 
@@ -234,15 +210,15 @@ protected:
     int length;     // length of the list
     int visible_len; // number of list visible on screen
     int curr;       // current position of the cursor on the whole list
-    char *texts;  // list of text on the keyboard
+    char *chrs;  // list of text on the keyboard
 
 public:
-    Keyboard(int width, int height, int x_pos, int y_pos, int length, int visible_len, char* texts)
+    Keyboard(int width, int height, int x_pos, int y_pos, int length, int visible_len, char* chrs)
     : UI_element(width, height, x_pos, y_pos){
         this->length = length;
         this->visible_len = visible_len;    // odd number
         this->curr = 0;
-        this->texts = texts;
+        this->chrs = chrs;
     }
 
     //getters
@@ -250,7 +226,7 @@ public:
 
     char getVisibleText(int idxdiff){
         if(0<=(this->curr + idxdiff)&&(this->curr + idxdiff)<this->length){
-            return this->texts[this->curr + idxdiff];
+            return this->chrs[this->curr + idxdiff];
         }
         return ' ';
     }
@@ -258,3 +234,20 @@ public:
     void moveBackward(){if(0<this->curr) this->curr--;}
     void moveForward(){if(this->curr<this->length-2) this->curr++;}
 };
+
+
+class TextBox : public UI_element {
+protected:
+    string text;
+    bool pressed;
+public:
+    TextBox(int width, int height, int x_pos, int y_pos)
+    : UI_element(width, height, x_pos, y_pos){
+        this->text = "";
+    }
+    void addText(char add) {this->text.push_back(add);}
+    void deleteOne() {this->text.pop_back();}
+    void deleteAll() {this->text = "";}
+};
+
+//class TextBoxKeyboard : 
