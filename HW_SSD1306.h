@@ -147,7 +147,7 @@ void navigationBarDisplay(string str1, string str2, string str3, string str4){
 
 
 // function that displays List screen
-void listDisplay(List* list){
+void listDisplay(List* list, string title){
   Div div = Div((*list).getWidth(), (*list).getHeight(), 
                 (*list).getXPos(), (*list).getYPos(), 
                 1, (*list).getVisibleLen(), 2);
@@ -178,7 +178,7 @@ void listDisplay(List* list){
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(2, 2);
-  display.print(F(" Settings"));
+  display.print(F((" "+title).c_str()));
 
   navigationBarDisplay("^", "v", "<-", "o");
 
@@ -285,7 +285,7 @@ static const unsigned char PROGMEM duck_bmp[] =
 ,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 ,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-void duckDisplay(){
+void duckDisplay_0(){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
   display.clearDisplay();
   display.drawBitmap(div.textAllign(DUCK_HEIGHT, 0, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
@@ -296,66 +296,24 @@ void duckDisplay(){
 }
 
 
-
-string temptemp[5] = {" 1. Alarm",
-                     " 2. Audio",
-                     " 3. Name reset",
-                     " 4. Age reset",
-                     " 5. Comms"};
-
-List listConstructTest(){
+List listConstructTest(string* temp, int size_list){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  string **temp_str = (string**)malloc(sizeof(string*)*5);
+  string **temp_str = (string**)malloc(sizeof(string*)*size_list);
 
   for(int i=0;i<5;i++){
-   temp_str[i] = &(temptemp[i]);
+   temp_str[i] = &(temp[i]);
   }
             
   List list = List(SCREEN_WIDTH, div.multiSectSize(3, DIV_HEIGHT_DIRECTION),
-                   0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 5, 3, temp_str);
+                   0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_list, 3, temp_str);
   return list;
 }
 
-char keytemp[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-Keyboard keyboardConstructTest(){
+Keyboard keyboardConstructTest(char* temp, int size_key){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  // char **tempkey = (char**)malloc(sizeof(char*)*26);
-
-  // for(int i=0;i<27;i++){
-  //  tempkey[i] = &(keytemp[i]);
-  // }
-            
   Keyboard keyboard = Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
-                               0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 27, 5, keytemp);
+                               0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_key, 5, temp);
   return keyboard;
 }
-
-
-
-bool buttonMapList(List* list){
-  if(fall_edge(5, &prev5, &curr5)){
-    (*list).moveBackward();
-    return true;
-  }
-  else if(fall_edge(4, &prev4, &curr4)){
-    (*list).moveForward();
-    return true;
-  }
-  return false;
-}
-
-bool buttonMapKey(Keyboard* keyboard){
-  if(fall_edge(5, &prev5, &curr5)){
-    (*keyboard).moveBackward();
-    return true;
-  }
-  else if(fall_edge(4, &prev4, &curr4)){
-    (*keyboard).moveForward();
-    return true;
-  }
-  return false;
-}
-
 
 #endif
