@@ -198,7 +198,7 @@ void keyboardDisplay(Keyboard* keyboard){
 
   display.drawRoundRect(div.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
                         div.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
-                        div.getWidth(), div.getHeight(), 3, SSD1306_WHITE);
+                        div.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.getHeight(), 3, SSD1306_WHITE);
   
   int cursor_width = div.getSectWidth()*2/3;
   display.drawRoundRect(div.textAllign(cursor_width, 2, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
@@ -296,24 +296,22 @@ void duckDisplay_0(){
 }
 
 
-List listConstructTest(string* temp, int size_list){
+List listConstruct(string* temp, int size_list){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
   string **temp_str = (string**)malloc(sizeof(string*)*size_list);
 
   for(int i=0;i<5;i++){
    temp_str[i] = &(temp[i]);
   }
-            
-  List list = List(SCREEN_WIDTH, div.multiSectSize(3, DIV_HEIGHT_DIRECTION),
-                   0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_list, 3, temp_str);
-  return list;
+
+  return List(SCREEN_WIDTH, div.multiSectSize(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
+              0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_list, 3, temp_str);;
 }
 
-Keyboard keyboardConstructTest(char* temp, int size_key){
+Keyboard keyboardConstruct(char* temp, int size_key){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  Keyboard keyboard = Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
-                               0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_key, 5, temp);
-  return keyboard;
+  return Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
+                  0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_key, 5, temp);;
 }
 
 #endif

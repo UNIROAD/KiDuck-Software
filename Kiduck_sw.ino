@@ -12,14 +12,14 @@
 int16_t screen = 0;
 
 string temptemp[5] = {" 1. Alarm",
-                     " 2. Audio",
-                     " 3. Name reset",
-                     " 4. Age reset",
-                     " 5. Comms"};
-List listtest_1 = listConstructTest(temptemp, 5);
+                      " 2. Audio",
+                      " 3. Name reset",
+                      " 4. Age reset",
+                      " 5. Comms"};
+List listtest_1 = listConstruct(temptemp, 5);
 
 char keytemp[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-Keyboard keytest_2 = keyboardConstructTest(keytemp, 27);
+Keyboard keytest_2 = keyboardConstruct(keytemp, 27);
 
 void showScreen(){
   delay(1);
