@@ -300,7 +300,7 @@ List listConstruct(string* temp, int size_list){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
   string **temp_str = (string**)malloc(sizeof(string*)*size_list);
 
-  for(int i=0;i<5;i++){
+  for(int i=0;i<size_list;i++){
    temp_str[i] = &(temp[i]);
   }
 
