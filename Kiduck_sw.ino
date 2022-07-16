@@ -11,45 +11,89 @@
 
 int16_t screen = 0;
 
-string temptemp[5] = {" 1. Alarm",
+
+string settings_arr[5] = {" 1. Alarm",
                       " 2. Audio",
                       " 3. Name reset",
                       " 4. Age reset",
                       " 5. Comms"};
-List listtest_1 = listConstruct(temptemp, 5);
+List settings_list_1 = listConstruct(settings_arr, 5);
+
+string alarm_arr[4] = {" 1. Feed alarm",
+                      " 2. Growth alarm",
+                      " 3. Sound alarm",
+                      " 4. Sleep alarm"};
+List alarm_list_2 = listConstruct(alarm_arr, 4);
+
+string audio_arr[6] = {" 1. Sound on",
+                      " 2. Volume",
+                      " 3. Music",
+                      " 4. Game sound",
+                      " 5. More sound",
+                      " 6. Main sound"};
+List audio_list_3 = listConstruct(audio_arr, 6);
 
 char keytemp[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-Keyboard keytest_2 = keyboardConstruct(keytemp, 27);
+Keyboard name_reset_4 = keyboardConstruct(keytemp, 27);
+Keyboard age_reset_5 = keyboardConstruct(keytemp, 27);
+
+string comms_arr[5] = {" 1. Wifi",
+                       " 2. Bluetooth"};
+List comms_list_6 = listConstruct(comms_arr, 2);
+
+
+
 
 void showScreen(){
   delay(1);
   switch(screen){
     case 0: duckDisplay_0(); break;
-    case 1: listDisplay(&listtest_1, "Settings"); break;
-    case 2: keyboardDisplay(&keytest_2); break;
+    case 1: listDisplay(&settings_list_1, "Settings"); break;
+    case 2: listDisplay(&alarm_list_2, "Alarms"); break;
+    case 3: listDisplay(&audio_list_3, "Audio"); break;
+    case 4: keyboardDisplay(&name_reset_4); break;
+    case 5: keyboardDisplay(&age_reset_5); break;
+    case 6: listDisplay(&comms_list_6, "Communications"); break;
     default: break;
   }
 }
 
-int smap[] = {1, 2, 0};
+int smap[] = {1, 65432, 1, 1, 1, 1, 1};
 void screenSwitchMap(int next){screen = smap[screen]%((int)pow(10, next+1))/((int)pow(10, next));}
 
 void actionMap(){
   if(fall_edge(3)){
     switch(screen){
-      case 1: listtest_1.moveBackward(); break;
-      case 2: keytest_2.moveBackward(); break;
+      case 1: settings_list_1.moveBackward(); break;
+      case 2: alarm_list_2.moveBackward(); break;
+      case 3: audio_list_3.moveBackward(); break;
+      case 4: name_reset_4.moveBackward(); break;
+      case 5: age_reset_5.moveBackward(); break;
+      case 6: comms_list_6.moveBackward(); break;
       default: break;
     }
   }else if(fall_edge(2)){
     switch(screen){
-      case 1: listtest_1.moveForward(); break;
-      case 2: keytest_2.moveForward(); break;
+      case 1: settings_list_1.moveForward(); break;
+      case 2: alarm_list_2.moveForward(); break;
+      case 3: audio_list_3.moveForward(); break;
+      case 4: name_reset_4.moveForward(); break;
+      case 5: age_reset_5.moveForward(); break;
+      case 6: comms_list_6.moveForward(); break;
       default: break;
     }
   }else if(fall_edge(1)){
-    screenSwitchMap(0);
+    switch(screen){
+      case 1: screenSwitchMap(5); break;
+      case 0: case 2: case 3: case 4: case 5: 
+      case 6: screenSwitchMap(0); break;
+      default: break;
+    }
   }else if(fall_edge(0)){
+    switch(screen){
+      case 1: screenSwitchMap(settings_list_1.getCurr()); break;
+      default: break;
+    }
   }
   showScreen();
 }
