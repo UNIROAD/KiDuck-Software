@@ -142,7 +142,6 @@ protected:
     int curr;       // current position of the cursor on the whole list
 
     string **texts;  // list of text on the list
-    void (**actions)(); // list of functions --------------> to be implemented
 public:
     List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string** texts)//}, void (**actions)()){
     : UI_element(width, height, x_pos, y_pos){ 
@@ -158,13 +157,13 @@ public:
         this->curr = 0;
 
         this->texts = texts;
-       //this->actions = actions;
     }
 
     //getters
     int getVisibleLen(){return this->visible_len;}
     int getCursorPos(){return this->cursor_pos;}
     int getListPos(){return this->list_pos;}
+    int getCurr(){return this->curr;}
 
     string getVisibleText(int idxdiff){return *(this->texts[this->list_pos + idxdiff]);}
     void moveBackward(){
@@ -192,9 +191,6 @@ public:
             this->curr++;
         }
     }
-
-   // does some action when list element selected
-   //void select() {this->actions[this->curr]();}
 };
 
 
