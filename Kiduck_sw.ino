@@ -1,6 +1,7 @@
 #include "Global_State.h"
 #include "HW_SSD1306.h"
 //#include "GUI_elements.h"
+#include <math.h>
 
 #ifndef ARD
 #include <SPI.h>
@@ -10,92 +11,60 @@
 
 int16_t screen = 0;
 
-List listtest = listConstructTest();
-Keyboard keytest = keyboardConstructTest();
+string temptemp[5] = {" 1. Alarm",
+                     " 2. Audio",
+                     " 3. Name reset",
+                     " 4. Age reset",
+                     " 5. Comms"};
+List listtest_1 = listConstructTest(temptemp, 5);
+
+char keytemp[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+Keyboard keytest_2 = keyboardConstructTest(keytemp, 27);
+
+void showScreen(){
+  delay(1);
+  switch(screen){
+    case 0: duckDisplay_0(); break;
+    case 1: listDisplay(&listtest_1, "Settings"); break;
+    case 2: keyboardDisplay(&keytest_2); break;
+    default: break;
+  }
+}
+
+int smap[] = {1, 2, 0};
+void screenSwitchMap(int next){screen = smap[screen]%((int)pow(10, next+1))/((int)pow(10, next));}
+
+void actionMap(){
+  if(fall_edge(3)){
+    switch(screen){
+      case 1: listtest_1.moveBackward(); break;
+      case 2: keytest_2.moveBackward(); break;
+      default: break;
+    }
+  }else if(fall_edge(2)){
+    switch(screen){
+      case 1: listtest_1.moveForward(); break;
+      case 2: keytest_2.moveForward(); break;
+      default: break;
+    }
+  }else if(fall_edge(1)){
+    screenSwitchMap(0);
+  }else if(fall_edge(0)){
+  }
+  showScreen();
+}
 
 void setup(){
  Serial.begin(9600);
  SSD1306_Setup();
  
  startupDisplay();
- duckDisplay();
+ showScreen();
 
  setButtonPinMode();
  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop(){
-  if(screen==1){
-    if(buttonMapList(&listtest)){
-      delay(1);
-      listDisplay(&listtest);
-    }
-  }
-  if(screen==2){
-    if(buttonMapKey(&keytest)){
-      delay(1);
-      keyboardDisplay(&keytest);
-    }
-  }
-  if(fall_edge(3, &prev3, &curr3)){
-    screen=(screen+1)%3;
-    switch(screen){
-      case 0:
-        duckDisplay();
-        break;
-      case 1:
-        listDisplay(&listtest);
-        break;
-      case 2:
-        keyboardDisplay(&keytest);
-        break;
-      default: break;
-    }
-  }
+  actionMap();
 }
-
-// void loop(){
-//   if(screen==1){
-//     if(buttonMapList(&listtest)){
-//       delay(1);
-//       listDisplay(&listtest);
-//     }
-//   }
-//   if(fall_edge(3, &prev3, &curr3)){
-//     screen=(screen+1)%2;
-//     if(screen) listDisplay(&listtest);
-//     else duckDisplay();
-//   }
-// }
-
-
-//////////////////////////////////////////////////////////
-
-
-// void setup(){
-//   Serial.begin(9600);
-
-//   SSD1306_Setup();
-//   cleartest();
-  
-//   setButtonPinMode();
-  
-//   pinMode(LED_BUILTIN, OUTPUT);
-// }
-
-// void loop(){
-//   if(buttonPressDetect()) cleartest();
-// }
-
-// void cleartest(){
-//   for(int i = 0; i < 2; i++){
-//     // LED 블링크 0.5초 켜고, 0.5초 끄고
-//     digitalWrite(LED_BUILTIN, HIGH);
-//     delay(1);
-//     digitalWrite(LED_BUILTIN, LOW);
-//   }
-//   screen = (++screen)%3;
-//   rectButtonSetDisplay(screen);
-//   navigationBarDisplay("ai", "bi", "ci", "di");
-//   delay(100);
-// }
