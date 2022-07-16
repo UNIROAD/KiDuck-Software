@@ -69,10 +69,10 @@ public:
     }
 
     // width or height of multiple sections
-    int multiSectSize(int len, bool direction){
+    int multiSectSize(int len, bool direction, bool padded){
         // if direction: width, elif !direction: height
         int sect_size = (direction)?this->sect_width:this->sect_height;
-        return (sect_size+this->padding) * len + this->padding;
+        return (sect_size+this->padding) * len + this->padding * ((padded)?1:-1);
     }
 
     // position of a text in left/center/right allignment of a section
