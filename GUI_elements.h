@@ -21,13 +21,6 @@ public:
     void draw();
 };
 
-// class Div{
-// protected:
-//     vector<UI_element> elements;
-// public:
-//     void draw();
-// };
-
 
 #define DIV_WIDTH_DIRECTION true
 #define DIV_HEIGHT_DIRECTION false
@@ -249,5 +242,3 @@ public:
     void deleteOne() {this->text.pop_back();}
     void deleteAll() {this->text = "";}
 };
-
-//class TextBoxKeyboard : 
