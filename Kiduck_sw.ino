@@ -33,9 +33,10 @@ string audio_arr[6] = {" 1. Sound on",
                       " 6. Main sound"};
 List audio_list_3 = listConstruct(audio_arr, 6);
 
-char keytemp[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-Keyboard name_reset_4 = keyboardConstruct(keytemp, 27);
-Keyboard age_reset_5 = keyboardConstruct(keytemp, 27);
+Keyboard name_reset_4 = engKeyboardConstruct();
+Textbox name_text_4 = textboxConstruct();
+Keyboard age_reset_5 = engKeyboardConstruct();
+Textbox age_text_5 = textboxConstruct();
 
 string comms_arr[5] = {" 1. Wifi",
                        " 2. Bluetooth"};
@@ -51,8 +52,8 @@ void showScreen(){
     case 1: listDisplay(&settings_list_1, "Settings"); break;
     case 2: listDisplay(&alarm_list_2, "Alarms"); break;
     case 3: listDisplay(&audio_list_3, "Audio"); break;
-    case 4: keyboardDisplay(&name_reset_4); break;
-    case 5: keyboardDisplay(&age_reset_5); break;
+    case 4: keyboardTextboxDisplay(&name_reset_4, &name_text_4, "Name"); break;
+    case 5: keyboardTextboxDisplay(&age_reset_5, &age_text_5, "Age"); break;
     case 6: listDisplay(&comms_list_6, "Communications"); break;
     default: break;
   }
@@ -84,14 +85,17 @@ void actionMap(){
     }
   }else if(fall_edge(1)){
     switch(screen){
-      case 1: screenSwitchMap(5); break;
-      case 0: case 2: case 3: case 4: case 5: 
-      case 6: screenSwitchMap(0); break;
+      case 0: screenSwitchMap(0); break;
+      case 1: screenSwitchMap(settings_list_1.getCurr()); break;
+      case 4: name_reset_4.enter(&name_text_4); break;
+      case 5: age_reset_5.enter(&age_text_5); break;
       default: break;
     }
   }else if(fall_edge(0)){
     switch(screen){
-      case 1: screenSwitchMap(settings_list_1.getCurr()); break;
+      case 1: screenSwitchMap(5); break;
+      case 2: case 3: case 4: case 5: 
+      case 6: screenSwitchMap(0); break;
       default: break;
     }
   }

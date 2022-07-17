@@ -180,14 +180,16 @@ void listDisplay(List* list, string title){
   display.setCursor(2, 2);
   display.print(F((" "+title).c_str()));
 
-  navigationBarDisplay("^", "v", "<-", "o");
+  navigationBarDisplay("^", "v", "o", "<-");
 
   display.display();
   delay(1);
 }
 
-void keyboardDisplay(Keyboard* keyboard){
-  Div div = Div((*keyboard).getWidth(), (*keyboard).getHeight(), 
+void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, string title){
+
+  // keyboard display
+  Div div_key = Div((*keyboard).getWidth(), (*keyboard).getHeight(), 
                 (*keyboard).getXPos(), (*keyboard).getYPos(), 
                 (*keyboard).getVisibleLen(), 1, 2);
   string vis_text;
@@ -196,14 +198,14 @@ void keyboardDisplay(Keyboard* keyboard){
 
   display.setTextSize(1); // Draw 1:1-scale text
 
-  display.drawRoundRect(div.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
-                        div.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
-                        div.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.getHeight(), 3, SSD1306_WHITE);
+  display.drawRoundRect(div_key.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
+                        div_key.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
+                        div_key.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div_key.getHeight(), 3, SSD1306_WHITE);
   
-  int cursor_width = div.getSectWidth()*2/3;
-  display.drawRoundRect(div.textAllign(cursor_width, 2, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
-                        div.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED)-2,
-                        cursor_width, div.getHeight()+4, 3, SSD1306_WHITE);
+  int cursor_width = div_key.getSectWidth()*2/3;
+  display.drawRoundRect(div_key.textAllign(cursor_width, 2, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                        div_key.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED)-2,
+                        cursor_width, div_key.getHeight()+4, 3, SSD1306_WHITE);
 
   display.setTextColor(SSD1306_WHITE);
 
@@ -211,17 +213,40 @@ void keyboardDisplay(Keyboard* keyboard){
   for(int i=0;i<len;i++){
     vis_text = (*keyboard).getVisibleText(i-len/2);
 
-    display.setCursor(div.textAllign(TEXT_WIDTH, i, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
-                      div.textAllign(TEXT_HEIGHT-4, 3, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
+    display.setCursor(div_key.textAllign(TEXT_WIDTH, i, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                      div_key.textAllign(TEXT_HEIGHT-4, 3, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
     display.print(F(vis_text.c_str()));
     delay(1);
   }
 
-  navigationBarDisplay("<", ">", "<-", "o");
+  // textbox display
+  Div div_text = Div((*textbox).getWidth(), (*textbox).getHeight(), 
+                (*textbox).getXPos(), (*textbox).getYPos(), 1, 1, 2);
+  
+  display.drawLine(div_text.getXPos(), div_text.getYPos()+div_text.getHeight(),
+                   div_text.getYPos()+div_text.getWidth(), div_text.getYPos()+div_text.getHeight(),
+                   SSD1306_WHITE);
+  
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(div_text.getXPos(), div_text.getYPos()+3);
+  display.print(F(((*textbox).getText()).c_str()));
+
+  // Title
+  Div div = Div(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1, 5, 2);
+  display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(2, 2);
+  display.print(F((" "+title).c_str()));
+
+
+  navigationBarDisplay("<", ">", "o", "<-");
 
   display.display();
   delay(1);
 }
+
 
 
 
@@ -291,7 +316,7 @@ void duckDisplay_0(){
   display.drawBitmap(div.textAllign(DUCK_HEIGHT, 0, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                      div.textAllign(DUCK_WIDTH, 0, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION), 
                      duck_bmp, DUCK_WIDTH, DUCK_HEIGHT, SSD1306_WHITE);
-  navigationBarDisplay("^", "v", "menu", "o");
+  navigationBarDisplay(" ", " ", "menu", " ");
   display.display();
 }
 
@@ -305,13 +330,20 @@ List listConstruct(string* temp, int size_list){
   }
 
   return List(SCREEN_WIDTH, div.multiSectSize(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
-              0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_list, 3, temp_str);;
+              0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_list, 3, temp_str);
 }
 
-Keyboard keyboardConstruct(char* temp, int size_key){
+Textbox textboxConstruct(){
+  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 7, 4, 2);
+  return Textbox(div.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.getSectHeight(),
+                 div.position(1, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 10);
+}
+
+char keyEng[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+Keyboard engKeyboardConstruct(){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
   return Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
-                  0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_key, 5, temp);;
+                  0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 27, 5, keyEng);
 }
 
 #endif
