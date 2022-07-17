@@ -193,6 +193,22 @@ public:
     }
 };
 
+class Textbox : public UI_element {
+protected:
+    string text;
+    int length;
+public:
+    Textbox(int width, int height, int x_pos, int y_pos, int length)
+    : UI_element(width, height, x_pos, y_pos){
+        this->text = "";
+        this->length = length;
+    }
+    string getText(){return this->text;}
+    
+    void addText(char add) {this->text.push_back(add);}
+    void deleteOne() {this->text.pop_back();}
+    void deleteAll() {this->text = "";}
+};
 
 class Keyboard : public UI_element {
 protected:
@@ -224,22 +240,4 @@ public:
     void moveForward(){if(this->curr<this->length-2) this->curr++;}
 
     void enter(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
-};
-
-
-class Textbox : public UI_element {
-protected:
-    string text;
-    int length;
-public:
-    Textbox(int width, int height, int x_pos, int y_pos, int length)
-    : UI_element(width, height, x_pos, y_pos){
-        this->text = "";
-        this->length = length;
-    }
-    string getText(){return this->text;}
-    
-    void addText(char add) {this->text.push_back(add);}
-    void deleteOne() {this->text.pop_back();}
-    void deleteAll() {this->text = "";}
 };
