@@ -200,7 +200,7 @@ protected:
     int visible_len; // number of list visible on screen
     int curr;       // current position of the cursor on the whole list
     char *chrs;  // list of text on the keyboard
-
+    
 public:
     Keyboard(int width, int height, int x_pos, int y_pos, int length, int visible_len, char* chrs)
     : UI_element(width, height, x_pos, y_pos){
@@ -222,18 +222,23 @@ public:
 
     void moveBackward(){if(0<this->curr) this->curr--;}
     void moveForward(){if(this->curr<this->length-2) this->curr++;}
+
+    void enter(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
 };
 
 
-class TextBox : public UI_element {
+class Textbox : public UI_element {
 protected:
     string text;
-    bool pressed;
+    int length;
 public:
-    TextBox(int width, int height, int x_pos, int y_pos)
+    Textbox(int width, int height, int x_pos, int y_pos, int length)
     : UI_element(width, height, x_pos, y_pos){
         this->text = "";
+        this->length = length;
     }
+    string getText(){return this->text;}
+    
     void addText(char add) {this->text.push_back(add);}
     void deleteOne() {this->text.pop_back();}
     void deleteAll() {this->text = "";}
