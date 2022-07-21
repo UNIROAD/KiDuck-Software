@@ -33,9 +33,9 @@ string audio_arr[6] = {" 1. Sound on",
                       " 6. Main sound"};
 List audio_list_3 = listConstruct(audio_arr, 6);
 
-Keyboard name_reset_4 = engKeyboardConstruct();
+Keyboard name_reset_4 = keyboardConstruct(KEY_ENG);
 Textbox name_text_4 = textboxConstruct();
-Keyboard age_reset_5 = engKeyboardConstruct();
+Keyboard age_reset_5 = keyboardConstruct(KEY_NUM);
 Textbox age_text_5 = textboxConstruct();
 
 string comms_arr[5] = {" 1. Wifi",

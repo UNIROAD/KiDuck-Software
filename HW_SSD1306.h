@@ -339,11 +339,16 @@ Textbox textboxConstruct(){
                  div.position(1, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 10);
 }
 
+
+#define KEY_ENG 27
+#define KEY_NUM 11
 char keyEng[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-Keyboard engKeyboardConstruct(){
+char keyNum[11] = "0123456789";
+Keyboard keyboardConstruct(int mode){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
   return Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
-                  0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 27, 5, keyEng);
+                  0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), mode, 5, 
+                  (mode==KEY_ENG)?keyEng:keyNum);
 }
 
 #endif
