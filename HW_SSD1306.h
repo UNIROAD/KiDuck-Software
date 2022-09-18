@@ -317,6 +317,14 @@ void duckDisplay_0(){
                      div.textAllign(DUCK_WIDTH, 0, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION), 
                      duck_bmp, DUCK_WIDTH, DUCK_HEIGHT, SSD1306_WHITE);
   navigationBarDisplay(" ", " ", "menu", " ");
+
+  // Name
+  div = Div(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1, 5, 2);
+  display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(2, 2);
+  display.print(F((" "+user_name).c_str()));
   display.display();
 }
 

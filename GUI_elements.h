@@ -209,6 +209,11 @@ public:
     void addText(char add) {this->text.push_back(add);}
     void deleteOne() {this->text.pop_back();}
     void deleteAll() {this->text = "";}
+    string flush() {
+        string temp = this->text;
+        this->text = "";
+        return temp;
+    }
 };
 
 class Keyboard : public UI_element {
