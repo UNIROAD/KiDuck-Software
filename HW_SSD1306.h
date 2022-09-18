@@ -240,9 +240,6 @@ void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, string title){
   display.setCursor(2, 2);
   display.print(F((" "+title).c_str()));
 
-
-  navigationBarDisplay("<", ">", "o", "<-");
-
   display.display();
   delay(1);
 }
@@ -323,7 +320,9 @@ void duckDisplay_0(){
   display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(2, 2);
+  display.setCursor(2, 40);
+  //display.setCursor(div.textAllign(TEXT_WIDTH, 0, DIV_LEFT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+  //                  div.textAllign(TEXT_HEIGHT, 3, DIV_LEFT_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
   display.print(F((" "+user_name).c_str()));
   display.display();
 }
