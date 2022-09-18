@@ -1,4 +1,5 @@
 #include <string>
+#include <math.h>
 
 using namespace std;
 
@@ -240,4 +241,23 @@ public:
     void moveForward(){if(this->curr<this->length-2) this->curr++;}
 
     void enter(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
+};
+
+class Slider : public UI_element {
+protected:
+    int length;     // length of the list
+    int curr;       // current position of the cursor on the whole list
+    
+public:
+    Slider(int width, int height, int x_pos, int y_pos, int length)
+    : UI_element(width, height, x_pos, y_pos){
+        this->length = length;
+        this->curr = 0;
+    }
+
+    int getCurr(){return this->curr;}
+
+    void moveBackward(){if(0<this->curr) this->curr--;}
+    void moveForward(){if(this->curr<this->length-1) this->curr++;}
+
 };
