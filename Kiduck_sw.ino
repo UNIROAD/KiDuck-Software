@@ -46,7 +46,7 @@ List comms_list_6 = listConstruct(comms_arr, 2);
 
 
 void showScreen(){
-  delay(1);
+  delay(10);
   switch(screen){
     case 0: duckDisplay_0(); break;
     case 1: listDisplay(&settings_list_1, "Settings"); break;
@@ -59,8 +59,21 @@ void showScreen(){
   }
 }
 
+void screenSwitchHook(){
+  switch(screen){
+    case 0: case 1: case 2: case 3: case 6: break;
+    case 4: if(name_text_4.getText()) user_name = name_text_4.flush(); break;
+    case 5: if(age_text_5.getText()) user_age = stoi(age_text_5.flush()); break;
+    default: break;
+  }
+}
+
+
 int smap[] = {1, 65432, 1, 1, 1, 1, 1};
-void screenSwitchMap(int next){screen = smap[screen]%((int)pow(10, next+1))/((int)pow(10, next));}
+void screenSwitchMap(int next){
+  screenSwitchHook();
+  screen = smap[screen]%((int)pow(10, next+1))/((int)pow(10, next));
+}
 
 void actionMap(){
   if(fall_edge(3)){
