@@ -245,6 +245,10 @@ void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, string title){
 }
 
 
+void blankScreen(){
+  display.clearDisplay();
+  display.display();
+}
 
 
 /*

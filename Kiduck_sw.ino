@@ -52,6 +52,13 @@ Textbox age_text_8 = textboxConstruct();
 void showScreen(){
   delay(10);
   switch(screen){
+    // init screen
+    case 7: keyboardTextboxDisplay(&name_init_7, &name_text_7, "Name"); 
+            navigationBarDisplay("<", ">", "o", "->"); break;
+    case 8: keyboardTextboxDisplay(&age_init_8, &age_text_8, "Age"); 
+            navigationBarDisplay("<", ">", "o", "->"); break;
+    
+    // main screen
     case 0: duckDisplay_0(); break;
     case 1: listDisplay(&settings_list_1, "Settings"); break;
     case 2: listDisplay(&alarm_list_2, "Alarms"); break;
@@ -62,28 +69,25 @@ void showScreen(){
             navigationBarDisplay("<", ">", "o", "<-"); break;
     case 6: listDisplay(&comms_list_6, "Communications"); break;
     
-    // init screen
-    case 7: keyboardTextboxDisplay(&name_init_7, &name_text_7, "Name"); 
-            navigationBarDisplay("<", ">", "o", "->"); break;
-    case 8: keyboardTextboxDisplay(&age_init_8, &age_text_8, "Age"); 
-            navigationBarDisplay("<", ">", "o", "->"); break;
+    // reserved state
+    case 9: blankScreen(); break
     default: break;
   }
 }
 
 void screenSwitchHook(){
   switch(screen){
-    case 0: case 1: case 2: case 3: case 6: break;
     case 4: if(!name_text_4.getText().empty()) user_name = name_text_4.flush(); break;
     case 5: if(!age_text_5.getText().empty()) user_age = stoi(age_text_5.flush()); break;
     case 7: if(!name_text_7.getText().empty()) user_name = name_text_7.flush(); break;
     case 8: if(!age_text_8.getText().empty()) user_age = stoi(age_text_8.flush()); break;
+    case 9: startupDisplay()
     default: break;
   }
 }
 
 
-int smap[] = {1, 65432, 1, 1, 1, 1, 1, 8, 0};
+int smap[] = {1, 65432, 1, 1, 1, 1, 1, 8, 0, 0};
 void screenSwitchMap(int next){
   screenSwitchHook();
   screen = smap[screen]%((int)pow(10, next+1))/((int)pow(10, next));
