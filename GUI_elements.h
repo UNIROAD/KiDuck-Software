@@ -29,7 +29,7 @@ public:
 #define DIV_HEIGHT_DIRECTION false
 #define DIV_LEFT_ALLIGNMENT -1
 #define DIV_CENTER_ALLIGNMENT 0
-#define DIV_RIGHT_ALLIGNEMENT 1
+#define DIV_RIGHT_ALLIGNMENT 1
 #define DIV_PADDED true
 #define DIV_PADLESS false
 
@@ -89,7 +89,7 @@ public:
         // center allignment
         else if(allign == DIV_CENTER_ALLIGNMENT) return position(num, direction, DIV_PADDED) + (sect_size - text_size) / 2;
         // right allignment
-        else if(allign == DIV_RIGHT_ALLIGNEMENT) position(num, direction, DIV_PADDED) + text_size - sect_size;
+        else if(allign == DIV_RIGHT_ALLIGNMENT) return position(num, direction, DIV_PADDED) + sect_size - text_size;
         return 0;
     }
 };
