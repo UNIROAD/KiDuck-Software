@@ -3,6 +3,8 @@
 
 using namespace std;
 
+#ifndef GUIELM
+
 class UI_element{
 protected:
     int width, height;
@@ -266,3 +268,6 @@ public:
     void moveForward(){if(this->curr<this->length-1) this->curr++;}
 
 };
+
+#define GUIELM
+#endif
