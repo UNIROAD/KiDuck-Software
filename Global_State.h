@@ -12,11 +12,10 @@ using namespace std;
 //############# Game Datas #############//
 string user_name;
 int user_age;
+int user_weight;
 
 int character;
 int growth = 0;
-int points = 0;
-
 
 //############# Pin Input Related #############//
 bool previn[] = {false, false, false, false};

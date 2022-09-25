@@ -275,7 +275,7 @@ void duckDisplay_0(){
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(div.textAllign(TEXT_WIDTH*10, 1, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                     div.textAllign(TEXT_HEIGHT, 1, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-  display.print(F(("Steps: "+to_string(steps) + " ").c_str()));
+  display.print(F(("Steps: "+to_string(today_steps) + " ").c_str()));
 
   // Name
   display.setCursor(div.textAllign(TEXT_WIDTH*(user_name.length()+2), 1, DIV_RIGHT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
