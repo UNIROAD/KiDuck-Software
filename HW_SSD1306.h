@@ -6,10 +6,10 @@
 
 
 #ifndef HW_SSD
-#define HW_SSD
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "Ingame_Mechanics.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -327,7 +327,7 @@ void duckDisplay_0(){
   display.setCursor(2, 40);
   //display.setCursor(div.textAllign(TEXT_WIDTH, 0, DIV_LEFT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
   //                  div.textAllign(TEXT_HEIGHT, 3, DIV_LEFT_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-  display.print(F((" "+user_name).c_str()));
+  display.print(F((" "+user_name+"   "+to_string(steps)).c_str()));
   display.display();
 }
 
@@ -362,4 +362,5 @@ Keyboard keyboardConstruct(int mode){
                   (mode==KEY_ENG)?keyEng:keyNum);
 }
 
+#define HW_SSD
 #endif

@@ -1,6 +1,7 @@
 #include "Global_State.h"
 #include "HW_SSD1306.h"
 //#include "GUI_elements.h"
+#include "Ingame_Mechanics.h"
 #include <math.h>
 
 #ifndef ARD
@@ -136,19 +137,30 @@ void actionMap(){
       default: break;
     }showScreen();
   }
+  else if(change_event()) showScreen();
 }
 
 void setup(){
- Serial.begin(9600);
- SSD1306_Setup();
- 
- startupDisplay();
- showScreen();
+  Serial.begin(9600);
 
- setButtonPinMode();
- pinMode(LED_BUILTIN, OUTPUT);
+  // Step counter setup
+  LSM9DS1_setup();
+  calibrate();
+
+  // Screen setup
+  SSD1306_Setup();
+  startupDisplay();
+  showScreen();
+
+  // Button setup
+  setButtonPinMode();
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop(){
+  // Step counter
+  if(elapsed_time_check()) step_count();
+
+  // Screen refresh & Button input process
   actionMap();
 }
