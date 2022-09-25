@@ -97,7 +97,7 @@ void screenSwitchMap(int next){
 void actionMap(){
   if(fall_edge(3)){
     switch(screen){
-//      case 0: character=(character+1)%3; break;
+            case 0: growth=(growth+1)%3; break; // delete this later
       case 1: settings_list_1.moveBackward(); break;
       case 2: alarm_list_2.moveBackward(); break;
       case 3: audio_list_3.moveBackward(); break;
@@ -160,7 +160,7 @@ void setup(){
 
 void loop(){
   // Step counter
-  if(elapsed_time_check()) step_count();
+  if(step_clock.elapsed_time_check()) step_count();
 
   // Screen refresh & Button input process
   actionMap();
