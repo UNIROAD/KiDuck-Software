@@ -53,7 +53,7 @@ void showScreen(){
   delay(10);
   switch(screen){
     // init screen
-    case 7: keyboardTextboxDisplay(&name_init_7, &name_text_7, "Name"); 
+    case 7: keyboardTextboxDisplay(&name_init_7, &name_text_7, "Name");
             navigationBarDisplay("<", ">", "o", "->"); break;
     case 8: keyboardTextboxDisplay(&age_init_8, &age_text_8, "Age"); 
             navigationBarDisplay("<", ">", "o", "->"); break;
@@ -70,7 +70,7 @@ void showScreen(){
     case 6: listDisplay(&comms_list_6, "Communications"); break;
     
     // reserved state
-    case 9: blankScreen(); break
+    case 9: blankScreen(); break;
     default: break;
   }
 }
@@ -81,7 +81,7 @@ void screenSwitchHook(){
     case 5: if(!age_text_5.getText().empty()) user_age = stoi(age_text_5.flush()); break;
     case 7: if(!name_text_7.getText().empty()) user_name = name_text_7.flush(); break;
     case 8: if(!age_text_8.getText().empty()) user_age = stoi(age_text_8.flush()); break;
-    case 9: startupDisplay()
+    case 9: startupDisplay();
     default: break;
   }
 }
@@ -105,7 +105,7 @@ void actionMap(){
       case 7: name_init_7.moveBackward(); break;
       case 8: age_init_8.moveBackward(); break;
       default: break;
-    }
+    }showScreen();
   }else if(fall_edge(2)){
     switch(screen){
       case 1: settings_list_1.moveForward(); break;
@@ -117,7 +117,7 @@ void actionMap(){
       case 7: name_init_7.moveForward(); break;
       case 8: age_init_8.moveForward(); break;
       default: break;
-    }
+    }showScreen();
   }else if(fall_edge(1)){
     switch(screen){
       case 0: screenSwitchMap(0); break;
@@ -127,16 +127,15 @@ void actionMap(){
       case 7: name_init_7.enter(&name_text_7); break;
       case 8: age_init_8.enter(&age_text_8); break;
       default: break;
-    }
+    }showScreen();
   }else if(fall_edge(0)){
     switch(screen){
       case 1: screenSwitchMap(5); break;
       case 2: case 3: case 4: case 5: 
       case 6: case 7: case 8: screenSwitchMap(0); break;
       default: break;
-    }
+    }showScreen();
   }
-  showScreen();
 }
 
 void setup(){
