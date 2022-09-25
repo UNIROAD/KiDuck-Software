@@ -14,24 +14,24 @@ void condition(){
 
 
 // Step Counter
-float step_thrshld = 0.8;
+float step_thrshld = 0.6;
 float xavg, yavg, zavg;
 int steps;
 bool st_flag = false;
 
 
 void LSM9DS1_setup(){
-  while (!Serial);
-  Serial.println("Started");
+//  while (!Serial);
+//  Serial.println("Started");
 
   if (!IMU.begin()) {
-    Serial.println("Failed to initialize IMU!");
+     Serial.println("Failed to initialize IMU!");
     while (1);
   }
 
-  Serial.print("Accelerometer sample rate = ");
-  Serial.print(IMU.accelerationSampleRate());
-  Serial.println("Hz"); 
+   Serial.print("Accelerometer sample rate = ");
+   Serial.print(IMU.accelerationSampleRate());
+   Serial.println("Hz"); 
 }
 
 void calibrate(){
@@ -59,7 +59,7 @@ void step_count(){
     totave = (totvect + prev_totvect) / 2 ;
     prev_totvect = totvect;
 
-    Serial.println("totave"); Serial.println(totave);
+//    Serial.println("totave"); Serial.println(totave);
 
     if(totave>step_thrshld && !st_flag){
         steps++;
@@ -69,7 +69,7 @@ void step_count(){
     if(totave<step_thrshld && st_flag) st_flag = false;
     if(steps<0) steps = 0;
 
-    Serial.println('\n'); Serial.print("steps: "); Serial.println(steps);
+//    Serial.println('\n'); Serial.print("steps: "); Serial.println(steps);
 }
 
 

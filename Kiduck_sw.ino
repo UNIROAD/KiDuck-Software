@@ -51,7 +51,7 @@ Textbox age_text_8 = textboxConstruct();
 
 
 void showScreen(){
-  delay(10);
+  delay(100);
   switch(screen){
     // init screen
     case 7: keyboardTextboxDisplay(&name_init_7, &name_text_7, "Name");
@@ -97,6 +97,7 @@ void screenSwitchMap(int next){
 void actionMap(){
   if(fall_edge(3)){
     switch(screen){
+//      case 0: character=(character+1)%3; break;
       case 1: settings_list_1.moveBackward(); break;
       case 2: alarm_list_2.moveBackward(); break;
       case 3: audio_list_3.moveBackward(); break;
