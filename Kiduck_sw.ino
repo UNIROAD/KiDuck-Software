@@ -13,12 +13,13 @@
 int16_t screen = 7;
 
 
-string settings_arr[5] = {" 1. Alarm",
+string settings_arr[6] = {" 1. Alarm",
                       " 2. Audio",
                       " 3. Name reset",
                       " 4. Age reset",
-                      " 5. Comms"};
-List settings_list_1 = listConstruct(settings_arr, 5);
+                      " 5. Weight reset",
+                      " 6. Comms"};
+List settings_list_1 = listConstruct(settings_arr, 6);
 
 string alarm_arr[4] = {" 1. Feed alarm",
                       " 2. Growth alarm",
@@ -38,6 +39,8 @@ Keyboard name_reset_4 = keyboardConstruct(KEY_ENG);
 Textbox name_text_4 = textboxConstruct();
 Keyboard age_reset_5 = keyboardConstruct(KEY_NUM);
 Textbox age_text_5 = textboxConstruct();
+Keyboard weight_reset_9 = keyboardConstruct(KEY_NUM);
+Textbox weight_text_9 = textboxConstruct();
 
 string comms_arr[5] = {" 1. Wifi",
                        " 2. Bluetooth"};
@@ -47,6 +50,9 @@ Keyboard name_init_7 = keyboardConstruct(KEY_ENG);
 Textbox name_text_7 = textboxConstruct();
 Keyboard age_init_8 = keyboardConstruct(KEY_NUM);
 Textbox age_text_8 = textboxConstruct();
+Keyboard weight_init_10 = keyboardConstruct(KEY_NUM);
+Textbox weight_text_10 = textboxConstruct();
+
 
 
 
@@ -58,7 +64,9 @@ void showScreen(){
             navigationBarDisplay("<", ">", "o", "->"); break;
     case 8: keyboardTextboxDisplay(&age_init_8, &age_text_8, "Age"); 
             navigationBarDisplay("<", ">", "o", "->"); break;
-    
+    case 10: keyboardTextboxDisplay(&weight_init_10, &weight_text_10, "Weight"); 
+            navigationBarDisplay("<", ">", "o", "->"); break;
+
     // main screen
     case 0: duckDisplay_0(); break;
     case 1: listDisplay(&settings_list_1, "Settings"); break;
@@ -68,10 +76,12 @@ void showScreen(){
             navigationBarDisplay("<", ">", "o", "<-"); break;
     case 5: keyboardTextboxDisplay(&age_reset_5, &age_text_5, "Age"); 
             navigationBarDisplay("<", ">", "o", "<-"); break;
+    case 9: keyboardTextboxDisplay(&weight_reset_9, &weight_text_9, "Weight"); 
+            navigationBarDisplay("<", ">", "o", "<-"); break;
     case 6: listDisplay(&comms_list_6, "Communications"); break;
     
     // reserved state
-    case 9: blankScreen(); break;
+    case -1: blankScreen(); break;
     default: break;
   }
 }
@@ -80,18 +90,20 @@ void screenSwitchHook(){
   switch(screen){
     case 4: if(!name_text_4.getText().empty()) user_name = name_text_4.flush(); break;
     case 5: if(!age_text_5.getText().empty()) user_age = stoi(age_text_5.flush()); break;
+    case 9: if(!weight_text_9.getText().empty()) user_weight = stoi(weight_text_9.flush()); break;
     case 7: if(!name_text_7.getText().empty()) user_name = name_text_7.flush(); break;
     case 8: if(!age_text_8.getText().empty()) user_age = stoi(age_text_8.flush()); break;
-    case 9: startupDisplay();
+    case 10: if(!weight_text_10.getText().empty()) user_weight = stoi(weight_text_10.flush()); break;
+    case -1: startupDisplay();
     default: break;
   }
 }
 
 
-int smap[] = {1, 65432, 1, 1, 1, 1, 1, 8, 0, 0};
+long long smap[] = {1, 60905040302, 1, 1, 1, 1, 1, 8, 10, 1, 0};
 void screenSwitchMap(int next){
   screenSwitchHook();
-  screen = smap[screen]%((int)pow(10, next+1))/((int)pow(10, next));
+  screen = (int)(smap[screen]%((long long)pow(100, next+1))/((long long)pow(100, next)));
 }
 
 void actionMap(){
@@ -106,6 +118,8 @@ void actionMap(){
       case 6: comms_list_6.moveBackward(); break;
       case 7: name_init_7.moveBackward(); break;
       case 8: age_init_8.moveBackward(); break;
+      case 9: weight_reset_9.moveBackward(); break;
+      case 10: weight_init_10.moveBackward(); break;
       default: break;
     }showScreen();
   }else if(fall_edge(2)){
@@ -118,6 +132,8 @@ void actionMap(){
       case 6: comms_list_6.moveForward(); break;
       case 7: name_init_7.moveForward(); break;
       case 8: age_init_8.moveForward(); break;
+      case 9: weight_reset_9.moveForward(); break;
+      case 10: weight_init_10.moveForward(); break;
       default: break;
     }showScreen();
   }else if(fall_edge(1)){
@@ -128,13 +144,15 @@ void actionMap(){
       case 5: age_reset_5.enter(&age_text_5); break;
       case 7: name_init_7.enter(&name_text_7); break;
       case 8: age_init_8.enter(&age_text_8); break;
+      case 9: weight_reset_9.enter(&weight_text_9); break;
+      case 10: weight_init_10.enter(&weight_text_10); break;
       default: break;
     }showScreen();
   }else if(fall_edge(0)){
     switch(screen){
-      case 1: screenSwitchMap(5); break;
-      case 2: case 3: case 4: case 5: 
-      case 6: case 7: case 8: screenSwitchMap(0); break;
+      case 1: screenSwitchMap(6); break;
+      case 2: case 3: case 4: case 5: case 6: case 7: 
+      case 8: case 9: case 10: screenSwitchMap(0); break;
       default: break;
     }showScreen();
   }
