@@ -1,4 +1,3 @@
-#include <string>
 #include <math.h>
 
 using namespace std;
@@ -81,7 +80,7 @@ public:
     if direction: width, elif !direction: height*/
     int textAllign(int text_size, int num, int allign, bool direction){
         int sect_size = (direction)?this->sect_width:this->sect_height;
-        return position(num, direction, DIV_PADDED) + (sect_size - text_size)*(allign/2);
+        return position(num, direction, DIV_PADDED) + (sect_size - text_size)/2*allign;
     }
 };
 
@@ -98,9 +97,9 @@ class Screen{
 
 class Texts : public UI_element{
 protected:
-    string text;
+    String text;
 public:
-    Texts(int width, int height, int x_pos, int y_pos, string text)
+    Texts(int width, int height, int x_pos, int y_pos, String text)
     : UI_element(width, height, x_pos, y_pos){
         this->text = text;
     }
@@ -108,11 +107,11 @@ public:
 
 class ToggleButton : public UI_element {
 protected:
-    string name;
+    String name;
     bool pressed;
 
 public:
-    ToggleButton(int width, int height, int x_pos, int y_pos, string name)
+    ToggleButton(int width, int height, int x_pos, int y_pos, String name)
     : UI_element(width, height, x_pos, y_pos){
         this->name = name;
         this->pressed = false;
@@ -135,9 +134,9 @@ protected:
     int list_pos;   // list number which is on the top of the screen
     int curr;       // current position of the cursor on the whole list
 
-    string **texts;  // list of text on the list
+    String **texts;  // list of text on the list
 public:
-    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, string** texts)//}, void (**actions)()){
+    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, String** texts)//}, void (**actions)()){
     : UI_element(width, height, x_pos, y_pos){ 
         this->width = width;
         this->height = height;
@@ -159,7 +158,7 @@ public:
     int getListPos(){return this->list_pos;}
     int getCurr(){return this->curr;}
 
-    string getVisibleText(int idxdiff){return *(this->texts[this->list_pos + idxdiff]);}
+    String getVisibleText(int idxdiff){return *(this->texts[this->list_pos + idxdiff]);}
     void moveBackward(){
         // moves cursor if cursor isn't at the top of the screen
         if(this->cursor_pos>0){
@@ -189,7 +188,7 @@ public:
 
 class Textbox : public UI_element {
 protected:
-    string text;
+    String text;
     int length;
 public:
     Textbox(int width, int height, int x_pos, int y_pos, int length)
@@ -197,13 +196,13 @@ public:
         this->text = "";
         this->length = length;
     }
-    string getText(){return this->text;}
+    String getText(){return this->text;}
     
-    void addText(char add) {this->text.push_back(add);}
-    void deleteOne() {this->text.pop_back();}
+    void addText(char add) {this->text.concat(add);}
+    void deleteOne() {this->text.remove(this->text.length()-1);}
     void deleteAll() {this->text = "";}
-    string flush() {
-        string temp = this->text;
+    String flush() {
+        String temp = this->text;
         this->text = "";
         return temp;
     }

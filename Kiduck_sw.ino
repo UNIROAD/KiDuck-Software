@@ -13,7 +13,7 @@
 int16_t screen = 7;
 
 
-string settings_arr[6] = {" 1. Alarm",
+String settings_arr[6] = {" 1. Alarm",
                       " 2. Audio",
                       " 3. Name reset",
                       " 4. Age reset",
@@ -21,13 +21,13 @@ string settings_arr[6] = {" 1. Alarm",
                       " 6. Comms"};
 List settings_list_1 = listConstruct(settings_arr, 6);
 
-string alarm_arr[4] = {" 1. Feed alarm",
+String alarm_arr[4] = {" 1. Feed alarm",
                       " 2. Growth alarm",
                       " 3. Sound alarm",
                       " 4. Sleep alarm"};
 List alarm_list_2 = listConstruct(alarm_arr, 4);
 
-string audio_arr[6] = {" 1. Sound on",
+String audio_arr[6] = {" 1. Sound on",
                       " 2. Volume",
                       " 3. Music",
                       " 4. Game sound",
@@ -42,7 +42,7 @@ Textbox age_text_5 = textboxConstruct();
 Keyboard weight_reset_9 = keyboardConstruct(KEY_NUM);
 Textbox weight_text_9 = textboxConstruct();
 
-string comms_arr[5] = {" 1. Wifi",
+String comms_arr[5] = {" 1. Wifi",
                        " 2. Bluetooth"};
 List comms_list_6 = listConstruct(comms_arr, 2);
 
@@ -88,12 +88,12 @@ void showScreen(){
 
 void screenSwitchHook(){
   switch(screen){
-    case 4: if(!name_text_4.getText().empty()) user_name = name_text_4.flush(); break;
-    case 5: if(!age_text_5.getText().empty()) user_age = stoi(age_text_5.flush()); break;
-    case 9: if(!weight_text_9.getText().empty()) user_weight = stoi(weight_text_9.flush()); break;
-    case 7: if(!name_text_7.getText().empty()) user_name = name_text_7.flush(); break;
-    case 8: if(!age_text_8.getText().empty()) user_age = stoi(age_text_8.flush()); break;
-    case 10: if(!weight_text_10.getText().empty()) user_weight = stoi(weight_text_10.flush()); break;
+    case 4: if(name_text_4.getText().length()) user_name = name_text_4.flush(); break;
+    case 5: if(age_text_5.getText().length()) user_age = age_text_5.flush().toInt(); break;
+    case 9: if(weight_text_9.getText().length()) user_weight = weight_text_9.flush().toInt(); break;
+    case 7: if(name_text_7.getText().length()) user_name = name_text_7.flush(); break;
+    case 8: if(age_text_8.getText().length()) user_age = age_text_8.flush().toInt(); break;
+    case 10: if(weight_text_10.getText().length()) user_weight = weight_text_10.flush().toInt(); break;
     case -1: startupDisplay();
     default: break;
   }
@@ -163,8 +163,8 @@ void setup(){
   Serial.begin(9600);
 
   // Step counter setup
-  LSM9DS1_setup();
-  calibrate();
+//  LSM9DS1_setup();
+//  calibrate();
 
   // Screen setup
   SSD1306_Setup();
@@ -178,7 +178,7 @@ void setup(){
 
 void loop(){
   // Step counter
-  if(step_clock.elapsed_time_check()) step_count();
+//  if(step_clock.elapsed_time_check()) step_count();
 
   // Screen refresh & Button input process
   actionMap();

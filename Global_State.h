@@ -5,12 +5,12 @@
 #endif
 
 #ifndef GLST
-#include <vector>
+#include <ArduinoSTL.h>
 
 using namespace std;
 
 //############# Game Datas #############//
-string user_name;
+String user_name;
 int user_age;
 int user_weight;
 
