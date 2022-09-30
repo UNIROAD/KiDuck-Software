@@ -108,7 +108,7 @@ void step_count(){
 vector<int> today_friend;
 
 void meet_reset(){
-    if(!today_friend.empty()){
+    if(today_friend.size()){
         meet_count.push_back(today_meet_count);
         today_friend.clear();
     }

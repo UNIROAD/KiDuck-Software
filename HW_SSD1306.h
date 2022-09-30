@@ -89,7 +89,7 @@ void _sbutton(bool selected, Div div, int x_num, int y_num, String text){
   display.setTextColor((selected)?SSD1306_BLACK:SSD1306_WHITE);
   display.setCursor(div.textAllign(text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, x_num, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                     div.textAllign(TEXT_HEIGHT, y_num, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-  display.print(F(text.c_str()));
+  display.print(text);
   
 }
 
@@ -111,11 +111,11 @@ void rectButtonSetDisplay(int num){
 }
 
 
-// string length less than 2 is recommended
+// String length less than 2 is recommended
 // draws on top of whatever is on the screen
-void navigationBarDisplay(string str1, string str2, string str3, string str4){
+void navigationBarDisplay(String str1, String str2, String str3, String str4){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  string temp_text[4] = {str1, str2, str3, str4};
+  String temp_text[4] = {str1, str2, str3, str4};
 
   display.fillRoundRect(div.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
                         div.position(-1, DIV_HEIGHT_DIRECTION, DIV_PADDED),
@@ -139,7 +139,7 @@ void navigationBarDisplay(string str1, string str2, string str3, string str4){
     
     display.setCursor(div.textAllign(temp_text[i].length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, i, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                       div.textAllign(TEXT_HEIGHT, -1, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-    display.print(F(temp_text[i].c_str()));
+    display.print(temp_text[i]);
     delay(1);
   }
   display.display();
@@ -148,11 +148,11 @@ void navigationBarDisplay(string str1, string str2, string str3, string str4){
 
 
 // function that displays List screen
-void listDisplay(List* list, string title){
+void listDisplay(List* list, String title){
   Div div = Div((*list).getWidth(), (*list).getHeight(), 
                 (*list).getXPos(), (*list).getYPos(), 
                 1, (*list).getVisibleLen(), 2);
-  string vis_text;
+  String vis_text;
 
   display.clearDisplay();
 
@@ -170,7 +170,7 @@ void listDisplay(List* list, string title){
     display.setTextColor((i==(*list).getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
     display.setCursor(div.textAllign(vis_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_LEFT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                       div.textAllign(TEXT_HEIGHT, i, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-    display.print(F(vis_text.c_str()));
+    display.print(vis_text);
     delay(1);
   }
 
@@ -179,7 +179,7 @@ void listDisplay(List* list, string title){
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(2, 2);
-  display.print(F((" "+title).c_str()));
+  display.print(" "+title);
 
   navigationBarDisplay("^", "v", "o", "<-");
 
@@ -187,13 +187,13 @@ void listDisplay(List* list, string title){
   delay(1);
 }
 
-void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, string title){
+void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, String title){
 
   // keyboard display
   Div div_key = Div((*keyboard).getWidth(), (*keyboard).getHeight(), 
                 (*keyboard).getXPos(), (*keyboard).getYPos(), 
                 (*keyboard).getVisibleLen(), 1, 2);
-  string vis_text;
+  String vis_text;
 
   display.clearDisplay();
 
@@ -216,7 +216,7 @@ void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, string title){
 
     display.setCursor(div_key.textAllign(TEXT_WIDTH, i, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                       div_key.textAllign(TEXT_HEIGHT-4, 3, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-    display.print(F(vis_text.c_str()));
+    display.print(vis_text);
     delay(1);
   }
 
@@ -231,7 +231,7 @@ void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, string title){
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(div_text.getXPos(), div_text.getYPos()+3);
-  display.print(F(((*textbox).getText()).c_str()));
+  display.print((*textbox).getText());
 
   // Title
   Div div = Div(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1, 5, 2);
@@ -239,7 +239,7 @@ void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, string title){
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(2, 2);
-  display.print(F((" "+title).c_str()));
+  display.print(" "+title);
 
   display.display();
   delay(1);
@@ -275,20 +275,20 @@ void duckDisplay_0(){
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(div.textAllign(TEXT_WIDTH*10, 1, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                     div.textAllign(TEXT_HEIGHT, 1, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-  display.print(F(("Steps: "+to_string(today_steps) + " ").c_str()));
+  display.print("Steps: "+String(today_steps) + " ");
 
   // Name
   display.setCursor(div.textAllign(TEXT_WIDTH*(user_name.length()+2), 1, DIV_RIGHT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
                     div.textAllign(TEXT_HEIGHT, 0, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-  display.print(F((user_name+"  ").c_str()));
+  display.print(user_name+"  ");
   
   display.display();
 }
 
 
-List listConstruct(string* temp, int size_list){
+List listConstruct(String* temp, int size_list){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  string **temp_str = (string**)malloc(sizeof(string*)*size_list);
+  String **temp_str = (String**)malloc(sizeof(String*)*size_list);
 
   for(int i=0;i<size_list;i++){
    temp_str[i] = &(temp[i]);
