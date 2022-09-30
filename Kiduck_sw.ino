@@ -103,7 +103,7 @@ void screenSwitchHook(){
 long long smap[] = {1, 60905040302, 1, 1, 1, 1, 1, 8, 10, 1, 0};
 void screenSwitchMap(int next){
   screenSwitchHook();
-  screen = (int)(smap[screen]%((long long)pow(100, next+1))/((long long)pow(100, next)));
+  screen = (int)(smap[screen]%((long long)ceil(pow(100, next+1)))/((long long)ceil(pow(100, next))));
 }
 
 void actionMap(){

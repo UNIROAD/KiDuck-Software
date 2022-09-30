@@ -1,6 +1,6 @@
 #ifndef GAMEM
 #include <Arduino_LSM9DS1.h>
-#include <vector>
+#include <ArduinoSTL.h>
 #include "Global_State.h"
 
 using namespace std;
