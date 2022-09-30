@@ -27,19 +27,17 @@ public:
 
 #define DIV_WIDTH_DIRECTION true
 #define DIV_HEIGHT_DIRECTION false
-#define DIV_LEFT_ALLIGNMENT -1
-#define DIV_CENTER_ALLIGNMENT 0
-#define DIV_RIGHT_ALLIGNMENT 1
+#define DIV_LEFT_ALLIGNMENT 0
+#define DIV_CENTER_ALLIGNMENT 1
+#define DIV_RIGHT_ALLIGNMENT 2
 #define DIV_PADDED true
 #define DIV_PADLESS false
 
 class Div: public UI_element{
     
-/*
-    Div class calculates the position of a divided section of a screen
-    if given a size of the screen and desired number of divisions
-    It can also account for padding between sections
-*/
+/*Div class calculates the position of a divided section of a screen
+if given a size of the screen and desired number of divisions
+    It can also account for padding between sections*/
 
 protected:
     int width_div, height_div;
@@ -61,9 +59,9 @@ public:
     int getSectWidth(){return this->sect_width;}
     int getSectHeight(){return this->sect_height;}
 
-    // position of a section
+    /*position of a section
+    if direction: width, elif !direction: height*/
     int position(int num, bool direction, bool padded){
-        // if direction: width, elif !direction: height
         int size = (direction)?this->width:this->height;
         int pos = (direction)?this->x_pos:this->y_pos;
         int div = (direction)?this->width_div:this->height_div;
@@ -78,19 +76,12 @@ public:
         return (sect_size+this->padding) * len + this->padding * ((padded)?1:-1);
     }
 
-    // position of a text in left/center/right allignment of a section
-    // int text_size : text width or height in pixels
+    /*position of a text in left/center/right allignment of a section
+    int text_size : text width or height in pixels
+    if direction: width, elif !direction: height*/
     int textAllign(int text_size, int num, int allign, bool direction){
-        // if direction: width, elif !direction: height
         int sect_size = (direction)?this->sect_width:this->sect_height;
-        
-        // left allignment
-        if(allign == DIV_LEFT_ALLIGNMENT) return position(num, direction, DIV_PADDED);
-        // center allignment
-        else if(allign == DIV_CENTER_ALLIGNMENT) return position(num, direction, DIV_PADDED) + (sect_size - text_size) / 2;
-        // right allignment
-        else if(allign == DIV_RIGHT_ALLIGNMENT) return position(num, direction, DIV_PADDED) + sect_size - text_size;
-        return 0;
+        return position(num, direction, DIV_PADDED) + (sect_size - text_size)/2*allign;
     }
 };
 
