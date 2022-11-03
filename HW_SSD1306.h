@@ -258,7 +258,7 @@ void blankScreen(){
 
 */
 
-void duckDisplay_0(){
+void duckDisplay(){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 1, 2);
   display.clearDisplay();
   // display.drawBitmap(div.textAllign(DUCK_HEIGHT, 0, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),

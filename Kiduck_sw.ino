@@ -68,7 +68,7 @@ void showScreen(){
             navigationBarDisplay("<", ">", "o", "->"); break;
 
     // main screen
-    case 0: duckDisplay_0(); break;
+    case 0: duckDisplay(); break;
     case 1: listDisplay(&settings_list_1, "Settings"); break;
     case 2: listDisplay(&alarm_list_2, "Alarms"); break;
     case 3: listDisplay(&audio_list_3, "Audio"); break;
