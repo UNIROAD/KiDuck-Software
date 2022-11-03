@@ -136,12 +136,12 @@ void actionMap(){
     switch(screen){
       case 0: screenSwitchMap(0); break;
       case 1: screenSwitchMap(settings_list_1.getCurr()); break;
-      case 4: name_reset_4.enter(&name_text_4); break;
-      case 5: age_reset_5.enter(&age_text_5); break;
-      case 7: name_init_7.enter(&name_text_7); break;
-      case 8: age_init_8.enter(&age_text_8); break;
-      case 9: weight_reset_9.enter(&weight_text_9); break;
-      case 10: weight_init_10.enter(&weight_text_10); break;
+      case 4: name_reset_4.getCurr(&name_text_4); break;
+      case 5: age_reset_5.getCurr(&age_text_5); break;
+      case 7: name_init_7.getCurr(&name_text_7); break;
+      case 8: age_init_8.getCurr(&age_text_8); break;
+      case 9: weight_reset_9.getCurr(&weight_text_9); break;
+      case 10: weight_init_10.getCurr(&weight_text_10); break;
       default: break;
     }showScreen();
   }else if(fall_edge(0)){

@@ -124,39 +124,47 @@ public:
 };
 
 
-class List : public UI_element {
+/* Parent Class of List, Keyboard, Slider*/
+class Scroller : public UI_element {
 protected:
-    int length;     // length of the list
-    int visible_len; // number of list visible on screen
+    int length;
+    int visible_len;
+    int curr;
+public:
+    Scroller(int width, int height, int x_pos, int y_pos, int length, int visible_len, int curr)
+    : UI_element(width, height, x_pos, y_pos){
+        this->length = length;
+        this->visible_len = visible_len;
+        this->curr = curr;
+    }
+    int getVisibleLen(){return this->visible_len;}
+    int getCurr(){return this->curr;}
 
+    // implement this when inherited
+    virtual void moveBackward() = 0;
+    virtual void moveForward() = 0;
+};
+
+
+class List : public Scroller {
+protected:
     // values that indicates the current position state of the list
     int cursor_pos; // position of the cursor on list of visible screen : 0 < this < visible_len
     int list_pos;   // list number which is on the top of the screen
-    int curr;       // current position of the cursor on the whole list
 
     String **texts;  // list of text on the list
 public:
     List(int width, int height, int x_pos, int y_pos, int length, int visible_len, String** texts)//}, void (**actions)()){
-    : UI_element(width, height, x_pos, y_pos){ 
-        this->width = width;
-        this->height = height;
-        this->x_pos = x_pos;
-        this->y_pos = y_pos;
-
-        this->length = length;
-        this->visible_len = visible_len;
+    : Scroller(width, height, x_pos, y_pos, length, visible_len, 0){ 
         this->cursor_pos = 0;
         this->list_pos = 0;
-        this->curr = 0;
 
         this->texts = texts;
     }
 
     //getters
-    int getVisibleLen(){return this->visible_len;}
     int getCursorPos(){return this->cursor_pos;}
     int getListPos(){return this->list_pos;}
-    int getCurr(){return this->curr;}
 
     String getVisibleText(int idxdiff){return *(this->texts[this->list_pos + idxdiff]);}
     void moveBackward(){
@@ -208,55 +216,36 @@ public:
     }
 };
 
-class Keyboard : public UI_element {
+class Keyboard : public Scroller {
 protected:
-    int length;     // length of the list
-    int visible_len; // number of list visible on screen
-    int curr;       // current position of the cursor on the whole list
     char *chrs;  // list of text on the keyboard
     
 public:
     Keyboard(int width, int height, int x_pos, int y_pos, int length, int visible_len, char* chrs)
-    : UI_element(width, height, x_pos, y_pos){
-        this->length = length;
-        this->visible_len = visible_len;    // odd number
-        this->curr = 0;
+    :  Scroller(width, height, x_pos, y_pos, length, visible_len, 0){
         this->chrs = chrs;
     }
 
     //getters
-    int getVisibleLen(){return this->visible_len;}
-
     char getVisibleText(int idxdiff){
         if(0<=(this->curr + idxdiff)&&(this->curr + idxdiff)<this->length){
             return this->chrs[this->curr + idxdiff];
         }
         return ' ';
     }
+    void getCurr(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
 
     void moveBackward(){if(0<this->curr) this->curr--;}
     void moveForward(){if(this->curr<this->length-2) this->curr++;}
 
-    void enter(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
 };
 
-class Slider : public UI_element {
-protected:
-    int length;     // length of the list
-    int curr;       // current position of the cursor on the whole list
-    
-public:
+class Slider : public Scroller {public:
     Slider(int width, int height, int x_pos, int y_pos, int length)
-    : UI_element(width, height, x_pos, y_pos){
-        this->length = length;
-        this->curr = 0;
-    }
-
-    int getCurr(){return this->curr;}
+    :  Scroller(width, height, x_pos, y_pos, length, 0, 0){}
 
     void moveBackward(){if(0<this->curr) this->curr--;}
     void moveForward(){if(this->curr<this->length-1) this->curr++;}
-
 };
 
 #define GUIELM
