@@ -1,14 +1,10 @@
 #include "Global_State.h"
 #include "HW_SSD1306.h"
-//#include "GUI_elements.h"
+#include "GUI_elements.h"
 #include "Ingame_Mechanics.h"
 #include <math.h>
-
-#ifndef ARD
 #include <SPI.h>
 #include <Wire.h>
-#define ARD
-#endif
 
 int16_t screen = 7;
 

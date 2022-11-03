@@ -1,12 +1,8 @@
-#ifndef ARD
 #include <SPI.h>
 #include <Wire.h>
-#define ARD
-#endif
-
-#ifndef GLST
 #include <ArduinoSTL.h>
 
+#ifndef GLST
 using namespace std;
 
 //############# Game Datas #############//

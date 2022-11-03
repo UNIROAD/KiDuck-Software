@@ -1,8 +1,8 @@
-#ifndef GAMEM
 #include <Arduino_LSM9DS1.h>
 #include <ArduinoSTL.h>
 #include "Global_State.h"
 
+#ifndef GAMEM
 using namespace std;
 
 //############# Game Criterion #############//

@@ -1,16 +1,12 @@
-#ifndef ARD
 #include <SPI.h>
 #include <Wire.h>
-#define ARD
-#endif
-
-
-#ifndef HW_SSD
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "Ingame_Mechanics.h"
 #include "Global_State.h"
+#include "GUI_elements.h"
+
+#ifndef HW_SSD
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
