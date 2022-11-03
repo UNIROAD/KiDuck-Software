@@ -143,103 +143,6 @@ void navigationBarDisplay(String str1, String str2, String str3, String str4){
 }
 
 
-// function that displays List screen
-void listDisplay(List* list, String title){
-  Div div = Div((*list).getWidth(), (*list).getHeight(), 
-                (*list).getXPos(), (*list).getYPos(), 
-                1, (*list).getVisibleLen(), 2);
-  String vis_text;
-
-  display.clearDisplay();
-
-  display.fillRect(div.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
-                  div.position((*list).getCursorPos(), DIV_HEIGHT_DIRECTION, DIV_PADDED),
-                  div.getSectWidth(),
-                  div.getSectHeight(),
-                  SSD1306_WHITE);
-
-  display.setTextSize(1); // Draw 1:1-scale text
-
-  for(int i=0;i<(*list).getVisibleLen();i++){
-    vis_text = (*list).getVisibleText(i);
-
-    display.setTextColor((i==(*list).getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
-    display.setCursor(div.textAllign(vis_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_LEFT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
-                      div.textAllign(TEXT_HEIGHT, i, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-    display.print(vis_text);
-    delay(1);
-  }
-
-  // Title
-  display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(2, 2);
-  display.print(" "+title);
-
-  navigationBarDisplay("^", "v", "o", "<-");
-
-  display.display();
-  delay(1);
-}
-
-void keyboardTextboxDisplay(Keyboard* keyboard, Textbox* textbox, String title){
-
-  // keyboard display
-  Div div_key = Div((*keyboard).getWidth(), (*keyboard).getHeight(), 
-                (*keyboard).getXPos(), (*keyboard).getYPos(), 
-                (*keyboard).getVisibleLen(), 1, 2);
-  String vis_text;
-
-  display.clearDisplay();
-
-  display.setTextSize(1); // Draw 1:1-scale text
-
-  display.drawRoundRect(div_key.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
-                        div_key.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
-                        div_key.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div_key.getHeight(), 3, SSD1306_WHITE);
-  
-  int cursor_width = div_key.getSectWidth()*2/3;
-  display.drawRoundRect(div_key.textAllign(cursor_width, 2, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
-                        div_key.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED)-2,
-                        cursor_width, div_key.getHeight()+4, 3, SSD1306_WHITE);
-
-  display.setTextColor(SSD1306_WHITE);
-
-  int len = (*keyboard).getVisibleLen();
-  for(int i=0;i<len;i++){
-    vis_text = (*keyboard).getVisibleText(i-len/2);
-
-    display.setCursor(div_key.textAllign(TEXT_WIDTH, i, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
-                      div_key.textAllign(TEXT_HEIGHT-4, 3, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
-    display.print(vis_text);
-    delay(1);
-  }
-
-  // textbox display
-  Div div_text = Div((*textbox).getWidth(), (*textbox).getHeight(), 
-                (*textbox).getXPos(), (*textbox).getYPos(), 1, 1, 2);
-  
-  display.drawLine(div_text.getXPos(), div_text.getYPos()+div_text.getHeight(),
-                   div_text.getYPos()+div_text.getWidth(), div_text.getYPos()+div_text.getHeight(),
-                   SSD1306_WHITE);
-  
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(div_text.getXPos(), div_text.getYPos()+3);
-  display.print((*textbox).getText());
-
-  // Title
-  Div div = Div(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1, 5, 2);
-  display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(2, 2);
-  display.print(" "+title);
-
-  display.display();
-  delay(1);
-}
 
 
 void blankScreen(){
@@ -281,36 +184,158 @@ void duckDisplay(){
   display.display();
 }
 
+class ListScreen: public Screen{
+public:
+  String title;
+  List list;
 
-List listConstruct(String* temp, int size_list){
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  String **temp_str = (String**)malloc(sizeof(String*)*size_list);
-
-  for(int i=0;i<size_list;i++){
-   temp_str[i] = &(temp[i]);
+  ListScreen(String title, String* stringlist, int size_list){
+    this->title = title;
+    this->list = listConstrict(stirnglist, size_list)
   }
 
-  return List(SCREEN_WIDTH, div.multiSectSize(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
-              0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_list, 3, temp_str);
-}
+  List listConstruct(String* temp, int size_list){
+    Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
+    String **temp_str = (String**)malloc(sizeof(String*)*size_list);
 
-Textbox textboxConstruct(){
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 7, 4, 2);
-  return Textbox(div.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.getSectHeight(),
-                 div.position(1, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 10);
-}
+    for(int i=0;i<size_list;i++){
+    temp_str[i] = &(temp[i]);
+    }
+
+    return List(SCREEN_WIDTH, div.multiSectSize(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
+                0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), size_list, 3, temp_str);
+  }
+
+  void draw(){
+    Div div = Div(this->list.getWidth(), this->list.getHeight(), 
+                  this->list.getXPos(), this->list.getYPos(), 
+                  1, this->list.getVisibleLen(), 2);
+    String vis_text;
+
+    display.clearDisplay();
+
+    display.fillRect(div.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
+                    div.position(this->list.getCursorPos(), DIV_HEIGHT_DIRECTION, DIV_PADDED),
+                    div.getSectWidth(),
+                    div.getSectHeight(),
+                    SSD1306_WHITE);
+
+    display.setTextSize(1); // Draw 1:1-scale text
+
+    for(int i=0;i<this->list.getVisibleLen();i++){
+      vis_text = this->list.getVisibleText(i);
+
+      display.setTextColor((i==this->list.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
+      display.setCursor(div.textAllign(vis_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_LEFT_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                        div.textAllign(TEXT_HEIGHT, i, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
+      display.print(vis_text);
+      delay(1);
+    }
+
+    // Title
+    display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(2, 2);
+    display.print(" "+this->title);
+
+    navigationBarDisplay("^", "v", "o", "<-");
+
+    display.display();
+    delay(1);
+  }
+};
 
 
 #define KEY_ENG 27
 #define KEY_NUM 11
 char keyEng[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 char keyNum[11] = "0123456789";
-Keyboard keyboardConstruct(int mode){
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  return Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
-                  0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), mode, 5, 
-                  (mode==KEY_ENG)?keyEng:keyNum);
-}
+
+class KeyboardTextboxScreen: public Screen{
+public:
+  String title
+  Textbox textbox;
+  Keyboard keyboard;
+
+  KeyboardTextboxScreen(String title, int keymode){
+    this->title = title;
+    this->textbox = this->textboxConstruct()
+    this->keyboard = this->keyboardConstruct(keymode)
+  }
+
+  Textbox textboxConstruct(){
+    Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 7, 4, 2);
+    return Textbox(div.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.getSectHeight(),
+                  div.position(1, DIV_WIDTH_DIRECTION, DIV_PADLESS), div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), 10);
+  }
+
+  Keyboard keyboardConstruct(int mode){
+    Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
+    return Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
+                    0, div.position(1, DIV_HEIGHT_DIRECTION, DIV_PADLESS), mode, 5, 
+                    (mode==KEY_ENG)?keyEng:keyNum);
+  }
+
+  void draw(){
+
+    // keyboard display
+    Div div_key = Div(this->keyboard.getWidth(), this->keyboard.getHeight(), 
+                  this->keyboard.getXPos(), this->keyboard.getYPos(), 
+                  this->keyboard.getVisibleLen(), 1, 2);
+    String vis_text;
+
+    display.clearDisplay();
+
+    display.setTextSize(1); // Draw 1:1-scale text
+
+    display.drawRoundRect(div_key.position(0, DIV_WIDTH_DIRECTION, DIV_PADDED),
+                          div_key.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED),
+                          div_key.multiSectSize(5, DIV_WIDTH_DIRECTION, DIV_PADLESS), div_key.getHeight(), 3, SSD1306_WHITE);
+    
+    int cursor_width = div_key.getSectWidth()*2/3;
+    display.drawRoundRect(div_key.textAllign(cursor_width, 2, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                          div_key.position(3, DIV_HEIGHT_DIRECTION, DIV_PADDED)-2,
+                          cursor_width, div_key.getHeight()+4, 3, SSD1306_WHITE);
+
+    display.setTextColor(SSD1306_WHITE);
+
+    int len = this->keyboard.getVisibleLen();
+    for(int i=0;i<len;i++){
+      vis_text = this->keyboard.getVisibleText(i-len/2);
+
+      display.setCursor(div_key.textAllign(TEXT_WIDTH, i, DIV_CENTER_ALLIGNMENT, DIV_WIDTH_DIRECTION),
+                        div_key.textAllign(TEXT_HEIGHT-4, 3, DIV_CENTER_ALLIGNMENT, DIV_HEIGHT_DIRECTION));
+      display.print(vis_text);
+      delay(1);
+    }
+
+    // textbox display
+    Div div_text = Div(this->textbox.getWidth(), this->textbox.getHeight(), 
+                  this->textbox.getXPos(), this->textbox.getYPos(), 1, 1, 2);
+    
+    display.drawLine(div_text.getXPos(), div_text.getYPos()+div_text.getHeight(),
+                    div_text.getYPos()+div_text.getWidth(), div_text.getYPos()+div_text.getHeight(),
+                    SSD1306_WHITE);
+    
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(div_text.getXPos(), div_text.getYPos()+3);
+    display.print(this->textbox.getText());
+
+    // Title
+    Div div = Div(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1, 5, 2);
+    display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(2, 2);
+    display.print(" "+this->title);
+
+    display.display();
+    delay(1);
+  }
+};
+
 
 #define HW_SSD
 #endif

@@ -90,8 +90,8 @@ class TextDiv: public Div{
 
 class Screen{
     virtual void draw() = 0;
-    virtual void controls() = 0;
-    virtual void buttonMap() = 0;
+    //virtual void controls() = 0;
+    //virtual void buttonMap() = 0;
 };
 
 
