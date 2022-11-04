@@ -8,4 +8,5 @@ Software for KiDuck, a handheld device for aiding swift recovery of hospitalized
 ![](README_Asset/Demonstration.gif)
 
 # Software Structure Overview
+(Outdated->Need Update)
 ![](README_Asset/software.png)
