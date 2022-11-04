@@ -176,7 +176,11 @@ public:
     Div getDiv(int w_div, int h_div, int pad) {return Div(getWidth(), getHeight(), getXPos(), getYPos(), w_div, h_div, pad);}
 
     bool not_empty(){return (bool)this->getText().length();}
-    void addText(char add) {this->text.concat(add);}
+    void addText(char add) {
+      this->text.concat(add);
+      if(this->text.length()>this->length) 
+        this->text.remove(0, 1);
+    }
     void deleteOne() {this->text.remove(this->text.length()-1);}
     void deleteAll() {this->text = "";}
     String flush() {

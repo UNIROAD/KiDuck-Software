@@ -31,13 +31,13 @@ String comms_arr[2] = {" 1. Wifi",
 ScreenWrapper settings_list_1("Settings", settings_arr, 6);
 ScreenWrapper alarm_list_2("Alarm", alarm_arr, 4);
 ScreenWrapper audio_list_3("Audio", audio_arr, 6);
-ScreenWrapper name_reset_4("Name", KEY_ENG, "<-");
-ScreenWrapper age_reset_5("Age", KEY_NUM, "<-");
+ScreenWrapper name_reset_4("Name", KEY_ENG, 10, "<-");
+ScreenWrapper age_reset_5("Age", KEY_NUM, 2, "<-");
 ScreenWrapper comms_list_6("Communications", comms_arr, 2);
-ScreenWrapper name_init_7("Name", KEY_ENG, "->");
-ScreenWrapper age_init_8("Age", KEY_NUM, "->");
-ScreenWrapper weight_reset_9("Weight", KEY_NUM, "<-");
-ScreenWrapper weight_init_10("Weight", KEY_NUM, "->");
+ScreenWrapper name_init_7("Name", KEY_ENG, 10, "->");
+ScreenWrapper age_init_8("Age", KEY_NUM, 2, "->");
+ScreenWrapper weight_reset_9("Weight", KEY_NUM, 2, "<-");
+ScreenWrapper weight_init_10("Weight", KEY_NUM, 2, "->");
 ScreenWrapper empty = ScreenWrapper();
 
 ScreenWrapper* getScreen(){

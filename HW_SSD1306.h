@@ -182,13 +182,18 @@ void blankScreen(){
 
 void duckDisplay_0(){
   Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 1, 2);
-  Div div2(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 2, 5, 2);
+  Div div2(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 5, 2);
+
   disp.clearDisplay();
   display.drawBitmap(div.allign( DUCK_WIDTH, 0, DIV_ALGN_C, DIV_DIR_W), 
                      div.allign(DUCK_HEIGHT, 0, DIV_ALGN_C, DIV_DIR_H), 
                      duck_img(), DUCK_WIDTH, DUCK_HEIGHT, SSD1306_WHITE);
-  disp.drawText(div2, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_C)  // Game State
-      .drawText(div2, user_name+"  ", 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R)                       // Name
+
+  disp.drawText(div2, "  "+user_name, 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R)                           // Name
+      .drawText(div2, "point: "+String(points) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_L)           // Point
+      .drawText(div2, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 2, DIV_ALGN_L)      // Steps
+      .drawText(div2, "Water: "+String(today_water) + " ", 1, SSD1306_WHITE, 1, 3, DIV_ALGN_L)      // Water
+      .drawText(div2, "Meet : "+String(today_meet_count) + " ", 1, SSD1306_WHITE, 1, 4, DIV_ALGN_L) // Meet
       .navigationBarDisplay(" ", "meet", "menu", " ")
       .display();
 }
@@ -201,7 +206,7 @@ void friendMeet_11(){
       .display();
 }
 
-
+//########################## Screen Classes ##########################//
 class ListScreen{
 public:
   String title;
@@ -267,19 +272,19 @@ public:
   String navKey4;
   int keymode;
 
-  KeyboardTextboxScreen(String title, int keymode, String navKey4)
+  KeyboardTextboxScreen(String title, int keymode, int length, String navKey4)
   : title(title), 
-    textbox(textboxConstruct()), 
+    textbox(textboxConstruct(length)), 
     keyboard(keyboardConstruct(keymode)), 
     navKey4(navKey4),
     keymode(keymode){}
 
-  Textbox textboxConstruct(){
+  Textbox textboxConstruct(int length){
     Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 7, 4, 2);
     return Textbox(div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), 
                    div.getSectHeight(), 
                    div.pos(1, DIV_DIR_W, DIV_PAD_X), 
-                   div.pos(1, DIV_DIR_H, DIV_PAD_X), 10);
+                   div.pos(1, DIV_DIR_H, DIV_PAD_X), length);
   }
 
   Keyboard keyboardConstruct(int mode){
@@ -312,7 +317,7 @@ public:
   displaySequence textboxDraw(){
     Textbox  tb = this->textbox;
     Div tb_div = tb.getDiv(1, 1, 2);
-    disp.drawText(tb_div, tb.getText(), 1, SSD1306_WHITE, 0, 0, DIV_ALGN_R)
+    disp.drawText(tb_div, tb.getText(), 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
         .drawLine(tb_div.getXPos(), 
                   tb_div.getYPos()+tb_div.getHeight(), 
                   tb_div.getYPos()+tb_div.getWidth(), 
@@ -336,7 +341,7 @@ public:
 
 String empty_string_list[1] = {""};
 ListScreen empty_listscreen("", empty_string_list, 1);
-KeyboardTextboxScreen empty_ktscreen("", 0, "");
+KeyboardTextboxScreen empty_ktscreen("", 0, 0, "");
 
 #define EMPTY 0
 #define LS 1
@@ -353,10 +358,10 @@ public:
     ls(ListScreen(title, stringlist, size_list)), 
     kts(empty_ktscreen){}
 
-  ScreenWrapper(String title, int keymode, String navKey4)
+  ScreenWrapper(String title, int keymode, int length, String navKey4)
   : type(KTS), 
     ls(empty_listscreen),
-    kts(KeyboardTextboxScreen(title, keymode, navKey4)){}
+    kts(KeyboardTextboxScreen(title, keymode, length, navKey4)){}
 
   ScreenWrapper()
   : type(EMPTY), 
