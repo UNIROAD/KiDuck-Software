@@ -1,20 +1,18 @@
 #include <math.h>
 
-using namespace std;
-
 #ifndef GUIELM
 
+using namespace std;
+
+//############# Base Classes #############//
 class UI_element{
 protected:
     int width, height;
     int x_pos, y_pos;
 public:
-    UI_element(int width, int height, int x_pos, int y_pos){
-        this->width = width;
-        this->height = height;
-        this->x_pos = x_pos;
-        this->y_pos = y_pos;
-    }
+    UI_element(int width, int height, int x_pos, int y_pos)
+    : width(width), height(height), x_pos(x_pos), y_pos(y_pos){}
+
     // getters
     int getWidth(){return this->width;}
     int getHeight(){return this->height;}
@@ -24,13 +22,49 @@ public:
 };
 
 
-#define DIV_WIDTH_DIRECTION true
-#define DIV_HEIGHT_DIRECTION false
-#define DIV_LEFT_ALLIGNMENT 0
-#define DIV_CENTER_ALLIGNMENT 1
-#define DIV_RIGHT_ALLIGNMENT 2
-#define DIV_PADDED true
-#define DIV_PADLESS false
+/* Parent Class of List, Keyboard, Slider*/
+class Scroller : public UI_element {
+protected:
+    int length;
+    int visible_len;
+    int curr;
+public:
+    Scroller(int width, int height, int x_pos, int y_pos, int length, int visible_len, int curr)
+    : UI_element(width, height, x_pos, y_pos), length(length), visible_len(visible_len), curr(curr){}
+
+    int getVisibleLen(){return this->visible_len;}
+    int getCurr(){return this->curr;}
+
+    // implement this when inherited
+    virtual void moveBackward() = 0;
+    virtual void moveForward() = 0;
+};
+
+class Screen{
+public:
+    String title;
+
+    Screen(String title): title(title){}
+
+    void draw(){}
+    void enter(){}
+    void moveBackward(){}
+    void moveForward(){}
+
+    int getCurr(){return 0;}
+    bool not_empty(){return false;}
+    String flush(){return "";}
+};
+
+
+//############# Helper Class #############//
+#define DIV_DIR_W true
+#define DIV_DIR_H false
+#define DIV_ALGN_L 0
+#define DIV_ALGN_C 1
+#define DIV_ALGN_R 2
+#define DIV_PAD_O true
+#define DIV_PAD_X false
 
 class Div: public UI_element{
     
@@ -45,12 +79,8 @@ protected:
 public:
     int sect_width, sect_height;
     Div(int width, int height, int x_pos, int y_pos, int width_div, int height_div, int padding)
-    : UI_element(width, height, x_pos, y_pos){
-        this->width_div = width_div;
-        this->height_div = height_div;
-        this->padding = padding;
-
-        this->sect_width = (width-padding) / width_div - padding;
+    : UI_element(width, height, x_pos, y_pos), width_div(width_div), height_div(height_div), padding(padding){
+        this->sect_width  = (width-padding)  / width_div  - padding;
         this->sect_height = (height-padding) / height_div - padding;
     }
 
@@ -61,14 +91,14 @@ public:
     /*position of a section
     if direction: width, elif !direction: height*/
     int position(int num, bool direction, bool padded){
-        int size = (direction)?this->width:this->height;
-        int pos = (direction)?this->x_pos:this->y_pos;
-        int div = (direction)?this->width_div:this->height_div;
-        if(padded == DIV_PADLESS) return pos + size/div * num;
+        int size = (direction)?this->width    :this->height;
+        int pos  = (direction)?this->x_pos    :this->y_pos;
+        int div  = (direction)?this->width_div:this->height_div;
+        if(padded == DIV_PAD_X) return pos + size/div * num;
         return pos + this->padding + (size - this->padding) * (num + ((num<0)?div:0)) / div;
     }
 
-    // width or height of multiple sections
+    /*width or height of multiple sections*/
     int multiSectSize(int len, bool direction, bool padded){
         // if direction: width, elif !direction: height
         int sect_size = (direction)?this->sect_width:this->sect_height;
@@ -80,31 +110,11 @@ public:
     if direction: width, elif !direction: height*/
     int textAllign(int text_size, int num, int allign, bool direction){
         int sect_size = (direction)?this->sect_width:this->sect_height;
-        return position(num, direction, DIV_PADDED) + (sect_size - text_size)/2*allign;
+        return position(num, direction, DIV_PAD_O) + (sect_size - text_size)/2*allign;
     }
 };
 
-class TextDiv: public Div{
-
-};
-
-class Screen{
-    virtual void draw() = 0;
-    //virtual void controls() = 0;
-    //virtual void buttonMap() = 0;
-};
-
-
-class Texts : public UI_element{
-protected:
-    String text;
-public:
-    Texts(int width, int height, int x_pos, int y_pos, String text)
-    : UI_element(width, height, x_pos, y_pos){
-        this->text = text;
-    }
-};
-
+//############# UI Element Classes #############//
 class ToggleButton : public UI_element {
 protected:
     String name;
@@ -112,10 +122,7 @@ protected:
 
 public:
     ToggleButton(int width, int height, int x_pos, int y_pos, String name)
-    : UI_element(width, height, x_pos, y_pos){
-        this->name = name;
-        this->pressed = false;
-    }
+    : UI_element(width, height, x_pos, y_pos), name(name), pressed(false){}
 
     bool toggle(){
         this->pressed = !this->pressed;
@@ -123,50 +130,21 @@ public:
     }
 };
 
-
-/* Parent Class of List, Keyboard, Slider*/
-class Scroller : public UI_element {
-protected:
-    int length;
-    int visible_len;
-    int curr;
-public:
-    Scroller(int width, int height, int x_pos, int y_pos, int length, int visible_len, int curr)
-    : UI_element(width, height, x_pos, y_pos){
-        this->length = length;
-        this->visible_len = visible_len;
-        this->curr = curr;
-    }
-    int getVisibleLen(){return this->visible_len;}
-    int getCurr(){return this->curr;}
-
-    // implement this when inherited
-    virtual void moveBackward() = 0;
-    virtual void moveForward() = 0;
-};
-
-
 class List : public Scroller {
 protected:
-    // values that indicates the current position state of the list
     int cursor_pos; // position of the cursor on list of visible screen : 0 < this < visible_len
     int list_pos;   // list number which is on the top of the screen
 
     String **texts;  // list of text on the list
 public:
-    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, String** texts)//}, void (**actions)()){
-    : Scroller(width, height, x_pos, y_pos, length, visible_len, 0){ 
-        this->cursor_pos = 0;
-        this->list_pos = 0;
-
-        this->texts = texts;
-    }
+    List(int width, int height, int x_pos, int y_pos, int length, int visible_len, String** texts)
+    : Scroller(width, height, x_pos, y_pos, length, visible_len, 0), cursor_pos(0), list_pos(0), texts(texts){}
 
     //getters
     int getCursorPos(){return this->cursor_pos;}
     int getListPos(){return this->list_pos;}
-
     String getVisibleText(int idxdiff){return *(this->texts[this->list_pos + idxdiff]);}
+
     void moveBackward(){
         // moves cursor if cursor isn't at the top of the screen
         if(this->cursor_pos>0){
@@ -200,18 +178,17 @@ protected:
     int length;
 public:
     Textbox(int width, int height, int x_pos, int y_pos, int length)
-    : UI_element(width, height, x_pos, y_pos){
-        this->text = "";
-        this->length = length;
-    }
+    : UI_element(width, height, x_pos, y_pos), text(""), length(length){}
+
     String getText(){return this->text;}
-    
+
+    bool not_empty(){return (bool)this->getText().length();}
     void addText(char add) {this->text.concat(add);}
     void deleteOne() {this->text.remove(this->text.length()-1);}
     void deleteAll() {this->text = "";}
     String flush() {
         String temp = this->text;
-        this->text = "";
+        this->deleteAll()
         return temp;
     }
 };
@@ -222,9 +199,7 @@ protected:
     
 public:
     Keyboard(int width, int height, int x_pos, int y_pos, int length, int visible_len, char* chrs)
-    :  Scroller(width, height, x_pos, y_pos, length, visible_len, 0){
-        this->chrs = chrs;
-    }
+    :  Scroller(width, height, x_pos, y_pos, length, visible_len, 0), chrs(chrs){}
 
     //getters
     char getVisibleText(int idxdiff){
@@ -233,7 +208,7 @@ public:
         }
         return ' ';
     }
-    void getCurr(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
+    void enter(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
 
     void moveBackward(){if(0<this->curr) this->curr--;}
     void moveForward(){if(this->curr<this->length-2) this->curr++;}
