@@ -189,7 +189,15 @@ void duckDisplay_0(){
                      duck_img(), DUCK_WIDTH, DUCK_HEIGHT, SSD1306_WHITE);
   disp.drawText(div2, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_C)  // Game State
       .drawText(div2, user_name+"  ", 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R)                       // Name
-      .navigationBarDisplay(" ", " ", "menu", " ")
+      .navigationBarDisplay(" ", "meet", "menu", " ")
+      .display();
+}
+
+void friendMeet_11(){
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
+  disp.clearDisplay()
+      .drawText(div, "Friend Meet", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay("^", "v", " ", "<-")
       .display();
 }
 
@@ -215,13 +223,11 @@ public:
                 size_list, 3, temp_str);
   }
 
-  void draw(){
+  displaySequence listDraw(){
     List ls = this->list;
     Div div = ls.getDiv(1, ls.getVisibleLen(), 2);
-    String vis_text;
 
-    disp.clearDisplay()
-        .fillRect(div.pos(0, DIV_DIR_W, DIV_PAD_O),
+    disp.fillRect(div.pos(0, DIV_DIR_W, DIV_PAD_O),
                   div.pos(ls.getCursorPos(), DIV_DIR_H, DIV_PAD_O), 
                   div.getSectWidth(), 
                   div.getSectHeight(), 
@@ -234,7 +240,13 @@ public:
                    0, i, DIV_ALGN_L)
           .delays(1);
 
-    disp.titleDisplay(this->title)
+    return disp;
+  }
+
+  void draw(){
+    disp.clearDisplay();
+         listDraw()
+        .titleDisplay(this->title)
         .navigationBarDisplay("^", "v", "o", "<-")
         .display()
         .delays(1);
@@ -277,38 +289,42 @@ public:
                     mode, 5, (mode==KEY_ENG)?keyEng:keyNum);
   }
 
-  void draw(){
+  displaySequence keyboardDraw(){
     Keyboard kb = this->keyboard;
-    Textbox  tb = this->textbox;
     int len = kb.getVisibleLen();
     Div kb_div = kb.getDiv(len, 1, 2);
     int cursor_width = kb_div.getSectWidth()*2/3;
-    Div tb_div = tb.getDiv(1, 1, 2);
-
-
-    // keyboard display
-    disp.clearDisplay()
-        .drawRoundRect(kb_div.pos(0, DIV_DIR_W, DIV_PAD_O), 
-                       kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-1, 
-                       kb_div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), 
-                       kb_div.getHeight(), 3, SSD1306_WHITE)
+    disp.drawRoundRect(kb_div.pos(0, DIV_DIR_W, DIV_PAD_O), 
+                      kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-1, 
+                      kb_div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), 
+                      kb_div.getHeight(), 3, SSD1306_WHITE)
         .drawRoundRect(kb_div.allign(cursor_width, 2, DIV_ALGN_C, DIV_DIR_W), 
-                       kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-3, 
-                       cursor_width, 
-                       kb_div.getHeight()+4, 3, SSD1306_WHITE);
+                      kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-3, 
+                      cursor_width, 
+                      kb_div.getHeight()+4, 3, SSD1306_WHITE);
     for(int i=0;i<len;i++){
       disp.drawText(kb_div, String(kb.getVisibleText(i-len/2)), 1 , SSD1306_WHITE, i, 3, DIV_ALGN_C)
           .delays(1);
     }
+    return disp;
+  }
 
-    // textbox display
-    disp.drawText(tb_div, tb.getText(), 1, SSD1306_WHITE, 0, 0, DIV_ALGN_L)
+  displaySequence textboxDraw(){
+    Textbox  tb = this->textbox;
+    Div tb_div = tb.getDiv(1, 1, 2);
+    disp.drawText(tb_div, tb.getText(), 1, SSD1306_WHITE, 0, 0, DIV_ALGN_R)
         .drawLine(tb_div.getXPos(), 
                   tb_div.getYPos()+tb_div.getHeight(), 
                   tb_div.getYPos()+tb_div.getWidth(), 
                   tb_div.getYPos()+tb_div.getHeight(), 
-                  SSD1306_WHITE)
-        // others
+                  SSD1306_WHITE);
+    return disp;
+  }
+
+  void draw(){
+    disp.clearDisplay();
+        keyboardDraw();
+        textboxDraw()
         .titleDisplay(this->title)
         .navigationBarDisplay("<", ">", "o", this->navKey4)
         .display()

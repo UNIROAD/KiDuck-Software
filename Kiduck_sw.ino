@@ -25,7 +25,7 @@ String audio_arr[6] = {" 1. Sound on",
                       " 4. Game sound",
                       " 5. More sound",
                       " 6. Main sound"};
-String comms_arr[5] = {" 1. Wifi",
+String comms_arr[2] = {" 1. Wifi",
                        " 2. Bluetooth"};
 
 ScreenWrapper settings_list_1("Settings", settings_arr, 6);
@@ -63,6 +63,7 @@ void showScreen(){
   delay(100);
   switch(screen){
     case 0:   duckDisplay_0();      break;
+    case 11:  friendMeet_11();      break;
     case -1:  blankScreen();        break;
     default:  getScreen()->draw();  break;
   }
@@ -79,7 +80,7 @@ void screenSwitchHook(){
 }
 
 
-long long smap[] = {1, 60905040302, 1, 1, 1, 1, 1, 8, 10, 1, 0};
+long long smap[] = {1101, 60905040302, 1, 1, 1, 1, 1, 8, 10, 1, 0, 0};
 void screenSwitchMap(int next){
   screenSwitchHook();
   screen = (int)(smap[screen]%((long long)ceil(pow(100, next+1)))/((long long)ceil(pow(100, next))));
@@ -94,6 +95,7 @@ void actionMap(){
     }showScreen();
   }else if(fall_edge(2)){
     switch(screen){
+      case 0:   screenSwitchMap(1);                       break;
       default:  getScreen()->moveForward();               break;
     }showScreen();
   }else if(fall_edge(1)){
