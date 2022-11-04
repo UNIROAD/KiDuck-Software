@@ -4,7 +4,7 @@
 
 using namespace std;
 
-//############# Base Classes #############//
+//########################## Base Classes ##########################//
 class UI_element{
 protected:
     int width, height;
@@ -56,8 +56,7 @@ public:
     String flush(){return "";}
 };
 
-
-//############# Helper Class #############//
+//########################## Helper Class ##########################//
 #define DIV_DIR_W true
 #define DIV_DIR_H false
 #define DIV_ALGN_L 0
@@ -90,7 +89,7 @@ public:
 
     /*position of a section
     if direction: width, elif !direction: height*/
-    int position(int num, bool direction, bool padded){
+    int pos(int num, bool direction, bool padded){
         int size = (direction)?this->width    :this->height;
         int pos  = (direction)?this->x_pos    :this->y_pos;
         int div  = (direction)?this->width_div:this->height_div;
@@ -108,13 +107,13 @@ public:
     /*position of a text in left/center/right allignment of a section
     int text_size : text width or height in pixels
     if direction: width, elif !direction: height*/
-    int textAllign(int text_size, int num, int allign, bool direction){
+    int allign(int text_size, int num, int allign, bool direction){
         int sect_size = (direction)?this->sect_width:this->sect_height;
-        return position(num, direction, DIV_PAD_O) + (sect_size - text_size)/2*allign;
+        return pos(num, direction, DIV_PAD_O) + (sect_size - text_size)/2*allign;
     }
 };
 
-//############# UI Element Classes #############//
+//########################## UI Element Classes ##########################//
 class ToggleButton : public UI_element {
 protected:
     String name;
@@ -144,6 +143,7 @@ public:
     int getCursorPos(){return this->cursor_pos;}
     int getListPos(){return this->list_pos;}
     String getVisibleText(int idxdiff){return *(this->texts[this->list_pos + idxdiff]);}
+    Div getDiv(int w_div, int h_div, int pad) {return Div(getWidth(), getHeight(), getXPos(), getYPos(), w_div, h_div, pad);}
 
     void moveBackward(){
         // moves cursor if cursor isn't at the top of the screen
@@ -181,6 +181,7 @@ public:
     : UI_element(width, height, x_pos, y_pos), text(""), length(length){}
 
     String getText(){return this->text;}
+    Div getDiv(int w_div, int h_div, int pad) {return Div(getWidth(), getHeight(), getXPos(), getYPos(), w_div, h_div, pad);}
 
     bool not_empty(){return (bool)this->getText().length();}
     void addText(char add) {this->text.concat(add);}
@@ -188,7 +189,7 @@ public:
     void deleteAll() {this->text = "";}
     String flush() {
         String temp = this->text;
-        this->deleteAll()
+        this->deleteAll();
         return temp;
     }
 };
@@ -208,6 +209,8 @@ public:
         }
         return ' ';
     }
+    Div getDiv(int w_div, int h_div, int pad) {return Div(getWidth(), getHeight(), getXPos(), getYPos(), w_div, h_div, pad);}
+
     void enter(Textbox* textbox){(*textbox).addText(this->getVisibleText(0));}
 
     void moveBackward(){if(0<this->curr) this->curr--;}
@@ -218,6 +221,8 @@ public:
 class Slider : public Scroller {public:
     Slider(int width, int height, int x_pos, int y_pos, int length)
     :  Scroller(width, height, x_pos, y_pos, length, 0, 0){}
+
+    Div getDiv(int w_div, int h_div, int pad) {return Div(getWidth(), getHeight(), getXPos(), getYPos(), w_div, h_div, pad);}
 
     void moveBackward(){if(0<this->curr) this->curr--;}
     void moveForward(){if(this->curr<this->length-1) this->curr++;}
