@@ -11,6 +11,7 @@
 
 using namespace std;
 
+//########################## SSD1306 HW Info ##########################//
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
@@ -29,33 +30,60 @@ using namespace std;
 #define BUTTON 9
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Div globalDiv(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
 
+//########################## UI Component Functions ##########################//
+void drawText(Div div, String text, int textsize, int color, int posX, int posY, int allign){
+    int w = TEXT_WIDTH;
+    int h = TEXT_HEIGHT;
+    int p = TEXT_PAD;
+    int l = text.length();
+    int ts = textsize;
 
-void SSD1306_Setup(){
-    // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-    if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-        Serial.println(F("SSD1306 allocation failed"));
-        for(;;); // Don't proceed, loop forever
-    }
+    display.setTextSize(ts);
+    display.setTextColor(color);
+    display.setCursor(div.allign(l*ts*(w+p)-p, posX,     allign, DIV_DIR_W),
+                      div.allign(        ts*h, posY, DIV_ALGN_C, DIV_DIR_H));
+    display.print(text);
 }
 
-void startupDisplay(){
-    display.clearDisplay();
+// String length less than 2 is recommended
+// draws on top of whatever is on the screen
+void navigationBarDisplay(String str1, String str2, String str3, String str4){
+  String temp_text[4] = {str1, str2, str3, str4};
 
-    Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, 0);
-    int textsize = 3;
+  display.fillRoundRect(globalDiv.pos( 0, DIV_DIR_W, DIV_PAD_O),
+                        globalDiv.pos(-1, DIV_DIR_H, DIV_PAD_O),
+                        globalDiv.getSectWidth(),
+                        globalDiv.getSectHeight(),
+                        globalDiv.getSectHeight()/2,  // radius of round edge
+                        SSD1306_WHITE);
+  
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 4, 5, 2);
 
-    display.setTextSize(textsize); display.setTextColor(SSD1306_WHITE);
-    display.setCursor(div.allign(7*textsize*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_ALGN_C, DIV_DIR_W),
-                      div.allign(                     textsize*TEXT_HEIGHT, 0, DIV_ALGN_C, DIV_DIR_H));
-    display.print(F("UNIROAD"));
+
+  for(int i=0;i<4;i++){
+    display.drawLine(div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
+                     div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + 1,
+                     div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
+                     div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + div.getSectHeight() - 1,
+                     SSD1306_BLACK);
     delay(1);
-
-    display.display();
-    delay(2000); // Pause for 2 seconds
-    display.clearDisplay();
+    drawText(div, temp_text[i], 1, SSD1306_BLACK, i, -1, DIV_ALGN_C);
+    delay(1);
+  }
+  display.display();
+  delay(1);
 }
 
+void titleDisplay(String title){
+    display.drawLine(0, 
+                    globalDiv.getSectHeight()+2, 
+                    globalDiv.getSectWidth()+2, 
+                    globalDiv.getSectHeight()+2, 
+                    SSD1306_WHITE);
+    drawText(globalDiv, " "+title, 1, SSD1306_WHITE, 0, 0, DIV_ALGN_L);
+}
 
 // function that displays set of rectangle Button
 void _sbutton(bool selected, Div div, int x_num, int y_num, String text){
@@ -73,11 +101,7 @@ void _sbutton(bool selected, Div div, int x_num, int y_num, String text){
                     div.getSectHeight(),
                     SSD1306_WHITE);
   }
-  display.setTextSize(1); // Draw 1:1-scale text
-  display.setTextColor((selected)?SSD1306_BLACK:SSD1306_WHITE);
-  display.setCursor(div.allign(text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, x_num, DIV_ALGN_C, DIV_DIR_W),
-                    div.allign(                                 TEXT_HEIGHT, y_num, DIV_ALGN_C, DIV_DIR_H));
-  display.print(text);
+  drawText(div, text, 1, (selected)?SSD1306_BLACK:SSD1306_WHITE, x_num, y_num, DIV_ALGN_C);
   
 }
 
@@ -99,42 +123,26 @@ void rectButtonSetDisplay(int num){
 }
 
 
-// String length less than 2 is recommended
-// draws on top of whatever is on the screen
-void navigationBarDisplay(String str1, String str2, String str3, String str4){
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-  String temp_text[4] = {str1, str2, str3, str4};
 
-  display.fillRoundRect(div.pos( 0, DIV_DIR_W, DIV_PAD_O),
-                        div.pos(-1, DIV_DIR_H, DIV_PAD_O),
-                        div.getSectWidth(),
-                        div.getSectHeight(),
-                        div.getSectHeight()/2,  // radius of round edge
-                        SSD1306_WHITE);
-  
-  div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 4, 5, 2);
+//########################## Screen Functions ##########################//
 
-  display.setTextSize(1); // Draw 1:1-scale text
-  display.setTextColor(SSD1306_BLACK);
 
-  for(int i=0;i<4;i++){
-    display.drawLine(div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
-                     div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + 1,
-                     div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
-                     div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + div.getSectHeight() - 1,
-                     SSD1306_BLACK);
-    delay(1);
-    
-    display.setCursor(div.allign(temp_text[i].length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD,  i, DIV_ALGN_C, DIV_DIR_W),
-                      div.allign(                                         TEXT_HEIGHT, -1, DIV_ALGN_C, DIV_DIR_H));
-    display.print(temp_text[i]);
-    delay(1);
-  }
-  display.display();
-  delay(1);
+void SSD1306_Setup(){
+    // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+    if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+        Serial.println(F("SSD1306 allocation failed"));
+        for(;;); // Don't proceed, loop forever
+    }
 }
 
+void startupDisplay(){
+    Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, 0);
 
+    display.clearDisplay();
+    drawText(div, "UNIROAD", 3, SSD1306_WHITE, 0, 0, DIV_ALGN_C); delay(1);
+    display.display(); delay(2000);
+    display.clearDisplay();
+}
 
 
 void blankScreen(){
@@ -142,92 +150,59 @@ void blankScreen(){
   display.display();
 }
 
-
-/*
-*/
-
 void duckDisplay_0(){
-  Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 1, 2);
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 1, 2);
   display.clearDisplay();
   display.drawBitmap(div.allign( DUCK_WIDTH, 0, DIV_ALGN_C, DIV_DIR_W),
                      div.allign(DUCK_HEIGHT, 0, DIV_ALGN_C, DIV_DIR_H), 
                      duck_img(), DUCK_WIDTH, DUCK_HEIGHT, SSD1306_WHITE);
-  navigationBarDisplay(" ", " ", "menu", " ");
 
-  // Game State
   div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 2, 5, 2);
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(div.allign(TEXT_WIDTH*10, 1, DIV_ALGN_C, DIV_DIR_W),
-                    div.allign(TEXT_HEIGHT  , 1, DIV_ALGN_C, DIV_DIR_H));
-  display.print("Steps: "+String(today_steps) + " ");
-
-  // Name
-  display.setCursor(div.allign(TEXT_WIDTH*(user_name.length()+2), 1, DIV_ALGN_R, DIV_DIR_W),
-                    div.allign(TEXT_HEIGHT                      , 0, DIV_ALGN_C, DIV_DIR_H));
-  display.print(user_name+"  ");
+  drawText(div, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_C);  // Game State
+  drawText(div, user_name+"  ", 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R);                       // Name
   
+  navigationBarDisplay(" ", " ", "menu", " ");
   display.display();
 }
 
 
+//########################## Screen classes ##########################//
 class ListScreen: public Screen{
 public:
   List list;
 
   ListScreen(String title, String* stringlist, int size_list)
-  : Screen(title), list(listConstruct(stringlist, size_list)){}
+  : Screen(title), 
+    list(listConstruct(stringlist, size_list)){}
 
   List listConstruct(String* temp, int size_list){
-    Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
     String **temp_str = (String**)malloc(sizeof(String*)*size_list);
 
-    for(int i=0;i<size_list;i++){
-    temp_str[i] = &(temp[i]);
-    }
+    for(int i=0;i<size_list;i++)
+      temp_str[i] = &(temp[i]);
 
-    return List(SCREEN_WIDTH, div.multiSectSize(3, DIV_DIR_H, DIV_PAD_O),
-                0, div.pos(1, DIV_DIR_H, DIV_PAD_X), size_list, 3, temp_str);
+    return List(SCREEN_WIDTH, globalDiv.multiSectSize(3, DIV_DIR_H, DIV_PAD_O),
+                0, globalDiv.pos(1, DIV_DIR_H, DIV_PAD_X), size_list, 3, temp_str);
   }
-
-  int getCurr(){return this->list.getCurr();}
-  void moveBackward(){this->list.moveBackward();}
-  void moveForward(){this->list.moveForward();}
 
   void draw(){
     List ls = this->list;
     Div div = ls.getDiv(1, ls.getVisibleLen(), 2);
-    String vis_text;
 
     display.clearDisplay();
-
-    display.fillRect(div.pos(                        0, DIV_DIR_W, DIV_PAD_O),
+    display.fillRect(div.pos(                0, DIV_DIR_W, DIV_PAD_O),
                      div.pos(ls.getCursorPos(), DIV_DIR_H, DIV_PAD_O),
                      div.getSectWidth(), div.getSectHeight(), SSD1306_WHITE);
 
-    display.setTextSize(1); // Draw 1:1-scale text
-
+    // each entry
     for(int i=0;i<ls.getVisibleLen();i++){
-      vis_text = ls.getVisibleText(i);
-
-      display.setTextColor((i==ls.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE);
-      display.setCursor(div.allign(vis_text.length()*(TEXT_WIDTH+TEXT_PAD)-TEXT_PAD, 0, DIV_ALGN_L, DIV_DIR_W),
-                        div.allign(                                     TEXT_HEIGHT, i, DIV_ALGN_C, DIV_DIR_H));
-      display.print(vis_text);
-      delay(1);
+      drawText(div, ls.getVisibleText(i), 1, (i==ls.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE,  0, i, DIV_ALGN_L); delay(1);
     }
 
-    // Title
-    display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(2, 2);
-    display.print(" "+this->title);
-
+    titleDisplay(this->title);
     navigationBarDisplay("^", "v", "o", "<-");
 
-    display.display();
-    delay(1);
+    display.display(); delay(1);
   }
 };
 
@@ -245,79 +220,53 @@ public:
   int keymode;
 
   KeyboardTextboxScreen(String title, int keymode, String navKey4)
-  : Screen(title), textbox(this->textboxConstruct()), keyboard(this->keyboardConstruct(keymode)), navKey4(navKey4), keymode(keymode){}
+  : Screen(title), 
+    textbox(this->textboxConstruct()), 
+    keyboard(this->keyboardConstruct(keymode)), 
+    navKey4(navKey4), 
+    keymode(keymode){}
 
   Textbox textboxConstruct(){
-    Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 7, 4, 2);
+    Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 7, 4, 2);
     return Textbox(div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), div.getSectHeight(),
-                  div.pos(1, DIV_DIR_W, DIV_PAD_X), div.pos(1, DIV_DIR_H, DIV_PAD_X), 10);
+                   div.pos(1, DIV_DIR_W, DIV_PAD_X), div.pos(1, DIV_DIR_H, DIV_PAD_X), 10);
   }
 
   Keyboard keyboardConstruct(int mode){
-    Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
-    return Keyboard(SCREEN_WIDTH, div.getSectHeight(), 
-                    0, div.pos(1, DIV_DIR_H, DIV_PAD_X), mode, 5, 
+    return Keyboard(SCREEN_WIDTH, globalDiv.getSectHeight(), 
+                    0, globalDiv.pos(1, DIV_DIR_H, DIV_PAD_X), mode, 5, 
                     (mode==KEY_ENG)?keyEng:keyNum);
   }
-
-  String flush(){return this->textbox.flush();}
-  void enter(){this->keyboard.enter(&this->textbox);}
-  void moveBackward(){this->keyboard.moveBackward();}
-  void moveForward(){this->keyboard.moveForward();}
-  bool not_empty(){return this->textbox.not_empty();}
 
   void draw(){
     Keyboard kb = this->keyboard;
     Textbox  tb = this->textbox;
+    int len = kb.getVisibleLen();
+    int cursor_width = kb_div.getSectWidth()*2/3;
+    Div kb_div = kb.getDiv(len, 1, 2);
+    Div tb_div = tb.getDiv(1, 1, 2);
+
     // keyboard display
-    Div kb_div = kb.getDiv(kb.getVisibleLen(), 1, 2);
-    String vis_text;
-
     display.clearDisplay();
-
-    display.setTextSize(1); // Draw 1:1-scale text
-
     display.drawRoundRect(kb_div.pos(0, DIV_DIR_W, DIV_PAD_O),
-                          kb_div.pos(3, DIV_DIR_H, DIV_PAD_O),
+                          kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-1,
                           kb_div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), kb_div.getHeight(), 3, SSD1306_WHITE);
     
-    int cursor_width = kb_div.getSectWidth()*2/3;
     display.drawRoundRect(kb_div.allign(cursor_width, 2, DIV_ALGN_C, DIV_DIR_W),
-                          kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-2,
+                          kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-3,
                           cursor_width, kb_div.getHeight()+4, 3, SSD1306_WHITE);
 
-    display.setTextColor(SSD1306_WHITE);
-
-    int len = kb.getVisibleLen();
     for(int i=0;i<len;i++){
-      vis_text = kb.getVisibleText(i-len/2);
-
-      display.setCursor(kb_div.allign(TEXT_WIDTH, i, DIV_ALGN_C, DIV_DIR_W),
-                        kb_div.allign(TEXT_HEIGHT-4, 3, DIV_ALGN_C, DIV_DIR_H));
-      display.print(vis_text);
-      delay(1);
+      drawText(kb_div, String(kb.getVisibleText(i-len/2)), 1 , SSD1306_WHITE, i, 3, DIV_ALGN_C); delay(1);
     }
 
     // textbox display
-    Div tb_div = tb.getDiv(1, 1, 2);
-    
     display.drawLine(tb_div.getXPos(), tb_div.getYPos()+tb_div.getHeight(),
                     tb_div.getYPos()+tb_div.getWidth(), tb_div.getYPos()+tb_div.getHeight(),
                     SSD1306_WHITE);
-    
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(tb_div.getXPos(), tb_div.getYPos()+3);
-    display.print(tb.getText());
+    drawText(tb_div, tb.getText(), 1, SSD1306_WHITE, 0, 0, DIV_ALGN_L);
 
-    // Title
-    Div div = Div(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1, 5, 2);
-    display.drawLine(0, div.getSectHeight()+2, div.getSectWidth()+2, div.getSectHeight()+2, SSD1306_WHITE);
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(2, 2);
-    display.print(" "+this->title);
-
+    titleDisplay(this->title);
     navigationBarDisplay("<", ">", "o", this->navKey4);
 
     display.display();
@@ -338,16 +287,24 @@ public:
   int type;
   ListScreen ls;
   KeyboardTextboxScreen kts;
-
+  
+  //################ Constructors ################//
   ScreenWrapper(String title, String* stringlist, int size_list)
-  : type(LS), ls(ListScreen(title, stringlist, size_list)), kts(empty_ktscreen){}
+  : type(LS), 
+    ls(ListScreen(title, stringlist, size_list)), 
+    kts(empty_ktscreen){}
 
   ScreenWrapper(String title, int keymode, String navKey4)
-  : type(KTS), kts(KeyboardTextboxScreen(title, keymode, navKey4)), ls(empty_listscreen){}
+  : type(KTS), 
+    ls(empty_listscreen),
+    kts(KeyboardTextboxScreen(title, keymode, navKey4)){}
 
   ScreenWrapper()
-  : type(EMPTY), ls(empty_listscreen), kts(empty_ktscreen){}
+  : type(EMPTY), 
+    ls(empty_listscreen), 
+    kts(empty_ktscreen){}
 
+  //################ Method Chooser ################//
   void draw(){
     switch(this->type){
       case LS: ls.draw(); break;
@@ -357,39 +314,39 @@ public:
   }
   int getCurr(){
     switch(this->type){
-      case LS: return ls.getCurr();
+      case LS: return ls.list.getCurr();
       default: return 0;
     }
   }
   String flush(){
     switch(this->type){
-      case KTS: kts.flush(); break;
+      case KTS: return kts.textbox.flush();
       default: return "";
     }
   }
   bool not_empty(){
     switch(this->type){
-      case KTS: kts.flush(); break;
+      case KTS: kts.textbox.not_empty(); break;
       default: return false;
     }
   }
   void enter(){
     switch(this->type){
-      case KTS: kts.enter(); break;
+      case KTS: kts.keyboard.enter(&kts.textbox); break;
       default: break;
     }
   }
   void moveBackward(){
     switch(this->type){
-      case LS: ls.moveBackward(); break;
-      case KTS: kts.moveBackward(); break;
+      case LS: ls.list.moveBackward(); break;
+      case KTS: kts.keyboard.moveBackward(); break;
       default: break;
     }
   }
   void moveForward(){
     switch(this->type){
-      case LS: ls.moveForward(); break;
-      case KTS: kts.moveForward(); break;
+      case LS: ls.list.moveForward(); break;
+      case KTS: kts.keyboard.moveForward(); break;
       default: break;
     }
   }

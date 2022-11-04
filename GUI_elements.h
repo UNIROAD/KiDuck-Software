@@ -18,7 +18,6 @@ public:
     int getHeight(){return this->height;}
     int getXPos(){return this->x_pos;}
     int getYPos(){return this->y_pos;}
-    void draw();
 };
 
 
@@ -47,13 +46,6 @@ public:
     Screen(String title): title(title){}
 
     void draw(){}
-    void enter(){}
-    void moveBackward(){}
-    void moveForward(){}
-
-    int getCurr(){return 0;}
-    bool not_empty(){return false;}
-    String flush(){return "";}
 };
 
 //########################## Helper Class ##########################//
