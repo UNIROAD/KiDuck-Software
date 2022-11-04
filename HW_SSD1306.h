@@ -32,101 +32,129 @@ using namespace std;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Div globalDiv(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 5, 2);
 
+
+class displaySequence{
+public:
+    Adafruit_SSD1306* disp;
+
+    displaySequence(Adafruit_SSD1306* display)
+    :disp(display){}
+
+    Adafruit_SSD1306* dp(){return this->disp;}
+
+    displaySequence display()                {(*dp()).display();           return *this;}
+    displaySequence clearDisplay()           {(*dp()).clearDisplay();      return *this;}
+    displaySequence delays(unsigned long ms) {delay(ms);                   return *this;}
+    displaySequence setTextSize(int ts)      {(*dp()).setTextSize(ts);     return *this;}
+    displaySequence setTextColor(int color)  {(*dp()).setTextColor(color); return *this;}
+    displaySequence setCursor(int x, int y)  {(*dp()).setCursor(x, y);     return *this;}
+    displaySequence print(String text)       {(*dp()).print(text);         return *this;}
+    displaySequence print(char* text)        {(*dp()).print(text);         return *this;}
+    displaySequence println(String text)     {(*dp()).println(text);       return *this;}
+    displaySequence println(char* text)      {(*dp()).println(text);       return *this;}
+
+    displaySequence drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)                    {(*dp()).drawLine(x1, y1, x2, y2, color);       return *this;}
+    displaySequence drawRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t rad, uint16_t color)     {(*dp()).drawRoundRect(x, y, w, h, rad, color); return *this;}
+    displaySequence drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)                        {(*dp()).drawRect(x, y, w, h, color);           return *this;}
+    displaySequence drawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color)         {(*dp()).drawBitmap(x, y, bitmap, w, h, color); return *this;}
+    displaySequence fillRoundRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t rad, uint16_t color)     {(*dp()).fillRoundRect(x, y, w, h, rad, color); return *this;}
+    displaySequence fillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)                        {(*dp()).fillRect(x, y, w, h, color);           return *this;}
+    
+    displaySequence drawText(Div div, String text, int textsize, int color, int posX, int posY, int allign){
+        int w = TEXT_WIDTH;
+        int h = TEXT_HEIGHT;
+        int p = TEXT_PAD;
+        int l = text.length();
+        int ts = textsize;
+
+        return (*this).setTextSize(ts)
+                      .setTextColor(color)
+                      .setCursor(div.allign(l*ts*(w+p)-p, posX,     allign, DIV_DIR_W),
+                                 div.allign(        ts*h, posY, DIV_ALGN_C, DIV_DIR_H))
+                      .print(text);
+    }
+
+    //############ UI Components ############//
+    /*String length less than 2 is recommended
+    draws on top of whatever is on the screen*/
+    displaySequence navigationBarDisplay(String str1, String str2, String str3, String str4){
+      String temp_text[4] = {str1, str2, str3, str4};
+
+      (*this).fillRoundRect(globalDiv.pos( 0, DIV_DIR_W, DIV_PAD_O),
+                            globalDiv.pos(-1, DIV_DIR_H, DIV_PAD_O),
+                            globalDiv.getSectWidth(),
+                            globalDiv.getSectHeight(),
+                            globalDiv.getSectHeight()/2,  // radius of round edge
+                            SSD1306_WHITE);
+      
+      Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 4, 5, 2);
+
+      for(int i=0;i<4;i++){
+        (*this).drawLine(div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
+                         div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + 1,
+                         div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
+                         div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + div.getSectHeight() - 1,
+                         SSD1306_BLACK)
+               .delays(1)
+               .drawText(div, temp_text[i], 1, SSD1306_BLACK, i, -1, DIV_ALGN_C)
+               .delays(1);
+      }
+      (*this).display()
+             .delays(1);
+      return *this;
+    }
+
+    displaySequence titleDisplay(String title){
+        return (*this).drawLine(0, 
+                                globalDiv.getSectHeight()+2, 
+                                globalDiv.getSectWidth()+2, 
+                                globalDiv.getSectHeight()+2, 
+                                SSD1306_WHITE)
+                      .drawText(globalDiv, " "+title, 1, SSD1306_WHITE, 0, 0, DIV_ALGN_L);
+    }
+};
+
+displaySequence disp(&display);
+
 //########################## UI Component Functions ##########################//
-void drawText(Div div, String text, int textsize, int color, int posX, int posY, int allign){
-    int w = TEXT_WIDTH;
-    int h = TEXT_HEIGHT;
-    int p = TEXT_PAD;
-    int l = text.length();
-    int ts = textsize;
-
-    display.setTextSize(ts);
-    display.setTextColor(color);
-    display.setCursor(div.allign(l*ts*(w+p)-p, posX,     allign, DIV_DIR_W),
-                      div.allign(        ts*h, posY, DIV_ALGN_C, DIV_DIR_H));
-    display.print(text);
-}
-
-// String length less than 2 is recommended
-// draws on top of whatever is on the screen
-void navigationBarDisplay(String str1, String str2, String str3, String str4){
-  String temp_text[4] = {str1, str2, str3, str4};
-
-  display.fillRoundRect(globalDiv.pos( 0, DIV_DIR_W, DIV_PAD_O),
-                        globalDiv.pos(-1, DIV_DIR_H, DIV_PAD_O),
-                        globalDiv.getSectWidth(),
-                        globalDiv.getSectHeight(),
-                        globalDiv.getSectHeight()/2,  // radius of round edge
-                        SSD1306_WHITE);
-  
-  Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 4, 5, 2);
-
-
-  for(int i=0;i<4;i++){
-    display.drawLine(div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
-                     div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + 1,
-                     div.pos(i%3+1, DIV_DIR_W, DIV_PAD_X),
-                     div.pos(   -1, DIV_DIR_H, DIV_PAD_O) + div.getSectHeight() - 1,
-                     SSD1306_BLACK);
-    delay(1);
-    drawText(div, temp_text[i], 1, SSD1306_BLACK, i, -1, DIV_ALGN_C);
-    delay(1);
-  }
-  display.display();
-  delay(1);
-}
-
-void titleDisplay(String title){
-    display.drawLine(0, 
-                    globalDiv.getSectHeight()+2, 
-                    globalDiv.getSectWidth()+2, 
-                    globalDiv.getSectHeight()+2, 
-                    SSD1306_WHITE);
-    drawText(globalDiv, " "+title, 1, SSD1306_WHITE, 0, 0, DIV_ALGN_L);
-}
-
 // function that displays set of rectangle Button
 void _sbutton(bool selected, Div div, int x_num, int y_num, String text){
   if(selected){
-   display.fillRect(div.pos(x_num, DIV_DIR_W, DIV_PAD_O),
+   disp.fillRect(div.pos(x_num, DIV_DIR_W, DIV_PAD_O),
                    div.pos(y_num, DIV_DIR_H, DIV_PAD_O),
                    div.getSectWidth(),
                    div.getSectHeight(),
                    SSD1306_WHITE);
   }
   else{
-   display.drawRect(div.pos(x_num, DIV_DIR_W, DIV_PAD_O),
+   disp.drawRect(div.pos(x_num, DIV_DIR_W, DIV_PAD_O),
                     div.pos(y_num, DIV_DIR_H, DIV_PAD_O),
                     div.getSectWidth(),
                     div.getSectHeight(),
                     SSD1306_WHITE);
   }
-  drawText(div, text, 1, (selected)?SSD1306_BLACK:SSD1306_WHITE, x_num, y_num, DIV_ALGN_C);
-  
+  disp.drawText(div, text, 1, (selected)?SSD1306_BLACK:SSD1306_WHITE, x_num, y_num, DIV_ALGN_C);
 }
 
 
 void rectButtonSetDisplay(int num){
-  display.clearDisplay();
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 2, 4, 3);
+  display.clearDisplay();
   
   _sbutton((bool)(num%2), div, 0, -2, "enter");
   _sbutton((bool)(num/2), div, 1, -2, "delete");
   
-  display.setTextSize(1); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("hi"));
-  
-  display.display();
-  delay(1);
+  disp.setTextSize(1)
+      .setTextColor(SSD1306_WHITE)
+      .setCursor(10, 0)
+      .println("hi")
+      .display()
+      .delays(1);
 }
 
 
 
 //########################## Screen Functions ##########################//
-
-
 void SSD1306_Setup(){
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -137,72 +165,79 @@ void SSD1306_Setup(){
 
 void startupDisplay(){
     Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1, 1, 0);
-
-    display.clearDisplay();
-    drawText(div, "UNIROAD", 3, SSD1306_WHITE, 0, 0, DIV_ALGN_C); delay(1);
-    display.display(); delay(2000);
-    display.clearDisplay();
+    
+    disp.clearDisplay()
+        .drawText(div, "UNIROAD", 3, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+        .delays(1)
+        .display()
+        .delays(2000)
+        .clearDisplay();
 }
 
 
 void blankScreen(){
-  display.clearDisplay();
-  display.display();
+  disp.clearDisplay()
+      .display();
 }
 
 void duckDisplay_0(){
   Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 1, 2);
-  display.clearDisplay();
-  display.drawBitmap(div.allign( DUCK_WIDTH, 0, DIV_ALGN_C, DIV_DIR_W),
+  Div div2(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 2, 5, 2);
+  disp.clearDisplay();
+  display.drawBitmap(div.allign( DUCK_WIDTH, 0, DIV_ALGN_C, DIV_DIR_W), 
                      div.allign(DUCK_HEIGHT, 0, DIV_ALGN_C, DIV_DIR_H), 
                      duck_img(), DUCK_WIDTH, DUCK_HEIGHT, SSD1306_WHITE);
-
-  div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 2, 5, 2);
-  drawText(div, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_C);  // Game State
-  drawText(div, user_name+"  ", 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R);                       // Name
-  
-  navigationBarDisplay(" ", " ", "menu", " ");
-  display.display();
+  disp.drawText(div2, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_C)  // Game State
+      .drawText(div2, user_name+"  ", 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R)                       // Name
+      .navigationBarDisplay(" ", " ", "menu", " ")
+      .display();
 }
 
 
-//########################## Screen classes ##########################//
-class ListScreen: public Screen{
+class ListScreen{
 public:
+  String title;
   List list;
 
   ListScreen(String title, String* stringlist, int size_list)
-  : Screen(title), 
+  : title(title), 
     list(listConstruct(stringlist, size_list)){}
 
   List listConstruct(String* temp, int size_list){
     String **temp_str = (String**)malloc(sizeof(String*)*size_list);
 
-    for(int i=0;i<size_list;i++)
+    for(int i=0;i<size_list;i++) 
       temp_str[i] = &(temp[i]);
 
-    return List(SCREEN_WIDTH, globalDiv.multiSectSize(3, DIV_DIR_H, DIV_PAD_O),
-                0, globalDiv.pos(1, DIV_DIR_H, DIV_PAD_X), size_list, 3, temp_str);
+    return List(SCREEN_WIDTH, 
+                globalDiv.multiSectSize(3, DIV_DIR_H, DIV_PAD_O), 0, 
+                globalDiv.pos(1, DIV_DIR_H, DIV_PAD_X), 
+                size_list, 3, temp_str);
   }
 
   void draw(){
     List ls = this->list;
     Div div = ls.getDiv(1, ls.getVisibleLen(), 2);
+    String vis_text;
 
-    display.clearDisplay();
-    display.fillRect(div.pos(                0, DIV_DIR_W, DIV_PAD_O),
-                     div.pos(ls.getCursorPos(), DIV_DIR_H, DIV_PAD_O),
-                     div.getSectWidth(), div.getSectHeight(), SSD1306_WHITE);
+    disp.clearDisplay()
+        .fillRect(div.pos(0, DIV_DIR_W, DIV_PAD_O),
+                  div.pos(ls.getCursorPos(), DIV_DIR_H, DIV_PAD_O), 
+                  div.getSectWidth(), 
+                  div.getSectHeight(), 
+                  SSD1306_WHITE);
 
     // each entry
-    for(int i=0;i<ls.getVisibleLen();i++){
-      drawText(div, ls.getVisibleText(i), 1, (i==ls.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE,  0, i, DIV_ALGN_L); delay(1);
-    }
+    for(int i=0;i<ls.getVisibleLen();i++)
+      disp.drawText(div, ls.getVisibleText(i), 1, 
+                   (i==ls.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE,  
+                   0, i, DIV_ALGN_L)
+          .delays(1);
 
-    titleDisplay(this->title);
-    navigationBarDisplay("^", "v", "o", "<-");
-
-    display.display(); delay(1);
+    disp.titleDisplay(this->title)
+        .navigationBarDisplay("^", "v", "o", "<-")
+        .display()
+        .delays(1);
   }
 };
 
@@ -212,30 +247,34 @@ public:
 char keyEng[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 char keyNum[11] = "0123456789";
 
-class KeyboardTextboxScreen: public Screen{
+class KeyboardTextboxScreen{
 public:
+  String title;
   Textbox textbox;
   Keyboard keyboard;
   String navKey4;
   int keymode;
 
   KeyboardTextboxScreen(String title, int keymode, String navKey4)
-  : Screen(title), 
-    textbox(this->textboxConstruct()), 
-    keyboard(this->keyboardConstruct(keymode)), 
-    navKey4(navKey4), 
+  : title(title), 
+    textbox(textboxConstruct()), 
+    keyboard(keyboardConstruct(keymode)), 
+    navKey4(navKey4),
     keymode(keymode){}
 
   Textbox textboxConstruct(){
     Div div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 7, 4, 2);
-    return Textbox(div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), div.getSectHeight(),
-                   div.pos(1, DIV_DIR_W, DIV_PAD_X), div.pos(1, DIV_DIR_H, DIV_PAD_X), 10);
+    return Textbox(div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), 
+                   div.getSectHeight(), 
+                   div.pos(1, DIV_DIR_W, DIV_PAD_X), 
+                   div.pos(1, DIV_DIR_H, DIV_PAD_X), 10);
   }
 
   Keyboard keyboardConstruct(int mode){
-    return Keyboard(SCREEN_WIDTH, globalDiv.getSectHeight(), 
-                    0, globalDiv.pos(1, DIV_DIR_H, DIV_PAD_X), mode, 5, 
-                    (mode==KEY_ENG)?keyEng:keyNum);
+    return Keyboard(SCREEN_WIDTH, 
+                    globalDiv.getSectHeight(), 0, 
+                    globalDiv.pos(1, DIV_DIR_H, DIV_PAD_X), 
+                    mode, 5, (mode==KEY_ENG)?keyEng:keyNum);
   }
 
   void draw(){
@@ -246,33 +285,37 @@ public:
     int cursor_width = kb_div.getSectWidth()*2/3;
     Div tb_div = tb.getDiv(1, 1, 2);
 
-    // keyboard display
-    display.clearDisplay();
-    display.drawRoundRect(kb_div.pos(0, DIV_DIR_W, DIV_PAD_O),
-                          kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-1,
-                          kb_div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), kb_div.getHeight(), 3, SSD1306_WHITE);
-    
-    display.drawRoundRect(kb_div.allign(cursor_width, 2, DIV_ALGN_C, DIV_DIR_W),
-                          kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-3,
-                          cursor_width, kb_div.getHeight()+4, 3, SSD1306_WHITE);
 
+    // keyboard display
+    disp.clearDisplay()
+        .drawRoundRect(kb_div.pos(0, DIV_DIR_W, DIV_PAD_O), 
+                       kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-1, 
+                       kb_div.multiSectSize(5, DIV_DIR_W, DIV_PAD_X), 
+                       kb_div.getHeight(), 3, SSD1306_WHITE)
+        .drawRoundRect(kb_div.allign(cursor_width, 2, DIV_ALGN_C, DIV_DIR_W), 
+                       kb_div.pos(3, DIV_DIR_H, DIV_PAD_O)-3, 
+                       cursor_width, 
+                       kb_div.getHeight()+4, 3, SSD1306_WHITE);
     for(int i=0;i<len;i++){
-      drawText(kb_div, String(kb.getVisibleText(i-len/2)), 1 , SSD1306_WHITE, i, 3, DIV_ALGN_C); delay(1);
+      disp.drawText(kb_div, String(kb.getVisibleText(i-len/2)), 1 , SSD1306_WHITE, i, 3, DIV_ALGN_C)
+          .delays(1);
     }
 
     // textbox display
-    display.drawLine(tb_div.getXPos(), tb_div.getYPos()+tb_div.getHeight(),
-                    tb_div.getYPos()+tb_div.getWidth(), tb_div.getYPos()+tb_div.getHeight(),
-                    SSD1306_WHITE);
-    drawText(tb_div, tb.getText(), 1, SSD1306_WHITE, 0, 0, DIV_ALGN_L);
-
-    titleDisplay(this->title);
-    navigationBarDisplay("<", ">", "o", this->navKey4);
-
-    display.display();
-    delay(1);
+    disp.drawText(tb_div, tb.getText(), 1, SSD1306_WHITE, 0, 0, DIV_ALGN_L)
+        .drawLine(tb_div.getXPos(), 
+                  tb_div.getYPos()+tb_div.getHeight(), 
+                  tb_div.getYPos()+tb_div.getWidth(), 
+                  tb_div.getYPos()+tb_div.getHeight(), 
+                  SSD1306_WHITE)
+        // others
+        .titleDisplay(this->title)
+        .navigationBarDisplay("<", ">", "o", this->navKey4)
+        .display()
+        .delays(1);
   }
 };
+
 
 
 String empty_string_list[1] = {""};
@@ -354,3 +397,4 @@ public:
 
 #define HW_SSD
 #endif
+
