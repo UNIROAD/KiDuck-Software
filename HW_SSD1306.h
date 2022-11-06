@@ -6,6 +6,7 @@
 #include "Ingame_Mechanics.h"
 #include "Global_State.h"
 #include "GUI_elements.h"
+#include "Bluetooth.h"
 
 #ifndef HW_SSD
 
@@ -198,11 +199,36 @@ void duckDisplay_0(){
       .display();
 }
 
-void friendMeet_11(){
+void friendMeet_9(){
   Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
   disp.clearDisplay()
       .drawText(div, "Friend Meet", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
       .navigationBarDisplay("^", "v", " ", "<-")
+      .display();
+}
+
+void syncApp_10(){
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
+  disp.clearDisplay()
+      .drawText(div, "Synchronizing...", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay(" ", " ", " ", " ")
+      .display();
+
+  bleSetup();
+  while(!escape_flag) syncApp();
+  escape_flag = 0;
+
+  disp.clearDisplay()
+      .drawText(div, "Complete", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay(" ", " ", " ", "<-")
+      .display();
+}
+
+void syncBottle_11(){
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
+  disp.clearDisplay()
+      .drawText(div, "Sync with Bottle", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay(" ", " ", " ", "<-")
       .display();
 }
 
