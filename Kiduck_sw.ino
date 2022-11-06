@@ -95,7 +95,7 @@ void actionMap(){
     switch(screen){
       case 0:   break;
       case 1:   screenSwitchMap(4);                       break;
-      case 2:   screenSwitchMap(2);                       break;
+      case 1:   screenSwitchMap(4);                       break;
       default:  screenSwitchMap(0);                       break;
     }showScreen();
   }else if(change_event()) showScreen();

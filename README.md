@@ -10,8 +10,8 @@ Software for KiDuck, a handheld device for aiding swift recovery of hospitalized
 # Developement Progress
 ### Integrate other codes
 - [x] Sync with Application via bluetooth
+- [ ] Sync with Water Bottle via bluetooth
 - [ ] Step Count
-- [ ] Sync with Water Bottle
 - [ ] Infrared Communication for Friend Meeting
 
 # Software Structure Overview
