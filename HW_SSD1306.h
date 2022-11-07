@@ -199,57 +199,39 @@ void duckDisplay_0(){
       .navigationBarDisplay(" ", "meet", "menu", " ")
       .display();
 }
-void syncApp_9_10(){
+
+void simpleTextScreen(String text, String str1, String str2, String str3, String str4){
   Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
   disp.clearDisplay()
-      .drawText(div, "Synchronizing...", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
-      .navigationBarDisplay(" ", " ", " ", " ")
+      .drawText(div, text, 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay(str1, str2, str3, str4)
       .display();
+}
+
+void syncApp_9_10(){
+  simpleTextScreen("Synchronizing...", " ", " ", " ", " ")
 
   bleSetup();
   while(!escape_flag) syncApp();
   escape_flag = 0;
 
-  disp.clearDisplay()
-      .drawText(div, "Complete", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
-      .navigationBarDisplay(" ", " ", " ", "<-")
-      .display();
+  simpleTextScreen("Complete", " ", " ", " ", "<-")
 }
 
-void syncBottle_11(){
-  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
-  disp.clearDisplay()
-      .drawText(div, "Sync with Bottle", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
-      .navigationBarDisplay(" ", " ", " ", "<-")
-      .display();
-}
+void syncBottle_11(){simpleTextScreen("Sync with Bottle", " ", " ", " ", "<-")}
 
-void friendMeet_12(){
-  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
-  disp.clearDisplay()
-      .drawText(div, "Friend Meet", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
-      .navigationBarDisplay("^", "v", " ", "<-")
-      .display();
-}
+void friendMeet_12(){simpleTextScreen("Friend Meet", "^", "v", " ", "<-")}
 
 void friendMeet_13_14(int mode){
-  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
-  disp.clearDisplay()
-      .drawText(div, "Friend Meet " + String(mode?"Recv":"Send") + " Mode", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
-      .navigationBarDisplay(" ", " ", " ", " ")
-      .display()
-      .delays(1000);
+  String str = "Friend Meet " + String(mode?"Recv":"Send");
+  simpleTextScreen(str+" Mode", " ", " ", " ", " ")
   
-  int result = meet(mode);
-  disp.clearDisplay();
-  switch(result){
-    case 0:  disp.drawText(div, "Friend Meet " + String(mode?"Recv":"Send") + " Complete", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C); break;
-    case -1: disp.drawText(div, "You already met this friend today", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C); break;
-    default: disp.drawText(div, "Friend Meet", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C); break;
+  switch(meet(mode)){
+    case 0:  simpleTextScreen(str+" Complete" , " ", " ", " ", " "); break;
+    case -1: simpleTextScreen("You already met this friend today", " ", " ", " ", " "); break;
+    case -2: simpleTextScreen("Force Exit", " ", " ", " ", " "); break;
+    default: simpleTextScreen("Friend Meet", " ", " ", " ", " "); break;
   }
-  disp.navigationBarDisplay(" ", " ", " ", " ")
-      .display()
-      .delays(2000);
 }
 
 
@@ -439,7 +421,7 @@ public:
   }
   bool not_empty(){
     switch(this->type){
-      case KTS: kts.textbox.not_empty(); break;
+      case KTS: return kts.textbox.not_empty();
       default: return false;
     }
   }
