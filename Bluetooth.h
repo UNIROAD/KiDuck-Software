@@ -1,12 +1,15 @@
 #include <SoftwareSerial.h>   //Software Serial Port
 #include <ArduinoSTL.h>
-
 #include "Global_State.h"
 
 #ifndef BLE
 
 #define RxD 4
 #define TxD 5
+
+#define COMM_INFO 0
+#define COMM_GROWTH 1
+#define COMM_NAME 2
 
 SoftwareSerial blueToothSerial(RxD, TxD); //the software serial port
 
@@ -30,23 +33,13 @@ int emergencyAlarm = 0;
 
 int escape_flag = 0;
 
-#define COMM_INFO 0
-#define COMM_GROWTH 1
-#define COMM_NAME 2
 
 //########################## string ##########################//
-//used for compare two string, return 0 if one equals to each other
-int strcmp(char *a, char *b){
-  for(unsigned int ptr = 0; a[ptr] != '\0'; ptr++){
-    if (a[ptr] != b[ptr]) return -1;
-  }
-  return 0;
-}
 
 //compare given string with recv_str
-int recvcmp(char *str) {return strcmp((char *)recv_str, str);}
+int recvcmp(const char *str) {return strcmp((char *)recv_str, str);}
 
-int strcmp2(char *a, const char *b){
+int strcmp(char *a, const char *b){
   for(unsigned int ptr = 0; a[ptr] != '\0'; ptr++){
     if (a[ptr] != b[ptr]) return -1;
   }
@@ -56,23 +49,15 @@ int strcmp2(char *a, const char *b){
 //########################## Bluetooth ##########################//
 
 //receive message from Bluetooth with time out
-int recvMsg(unsigned int timeout)
-{
+int recvMsg(unsigned int timeout){
   //wait for feedback
-  unsigned int time = 0;
   unsigned char num;
-  unsigned char i;
+  unsigned char len = 100;
+  int i = 0;
 
   //waiting for the first character with time out
-  i = 0;
-  while (1){
+  for(unsigned int time = 0;!blueToothSerial.available();time++){
     delay(50);
-    if (blueToothSerial.available()){
-      recv_str[i] = char(blueToothSerial.read());
-      i++;
-      break;
-    }
-    time++;
     if (time > (timeout / 50)) return -1;
   }
 
@@ -86,11 +71,9 @@ int recvMsg(unsigned int timeout)
 }
 
 //send command to Bluetooth and return if there is a response received
-int sendBlueToothCommand(char command[])
-{
+int sendBlueToothCommand(char command[]){
   Serial.print("send: ");
-  Serial.print(command);
-  Serial.println("");
+  Serial.println(command);
 
   blueToothSerial.print(command);
   delay(300);
@@ -98,29 +81,24 @@ int sendBlueToothCommand(char command[])
   if (recvMsg(200) != 0) return -1;
 
   Serial.print("recv: ");
-  Serial.print(recv_str);
-  Serial.println("");
+  Serial.println(recv_str);
   return 0;
 }
 
 
 //configure the Bluetooth through AT commands
-int setupBlueToothConnection()
-{
+int setupBlueToothConnection(){
   Serial.print("Setting up Bluetooth link\r\n");
   delay(2000);//wait for module restart
   blueToothSerial.begin(9600);
 
   //wait until Bluetooth was found
   while (1){
-    if (sendBlueToothCommand("AT") == 0){
-      if (recvcmp((char *)"OK") == 0){
-        Serial.println("Bluetooth exists\r\n");
-        break;
-      }
-    }
     delay(500);
+    if (sendBlueToothCommand("AT") != 0) continue;
+    if (recvcmp("OK") == 0) break;
   }
+  Serial.println("Bluetooth exists\r\n");
 
   //configure the Bluetooth
   sendBlueToothCommand("AT+RENEW");//restore factory configurations
@@ -133,7 +111,7 @@ int setupBlueToothConnection()
 
   //check if the Bluetooth always exists
   if (sendBlueToothCommand("AT") == 0){
-    if (recvcmp((char *)"OK") == 0){
+    if (recvcmp("OK") == 0){
       Serial.print("Setup complete\r\n\r\n");
       return 0;
     }
@@ -179,37 +157,30 @@ int sendKiDuckInfo() {
   return 0;
 }
 
-int sendKiDuckGrowth() {
-  String sendThreshold = String(threshold[0]) + ' ' + String(threshold[1]) + ' ' + String(threshold[2]);
-  if (sendThreshold.length() > 20)
-    return -1;
+String fixLen(String sendVal){
+  if (sendVal.length() > 20)
+    return "";
 
-  while (sendThreshold.length() < 20) {
-    sendThreshold += ' ';
+  while (sendVal.length() < 20) {
+    sendVal += ' ';
   }
+  return sendVal;
+}
 
-  blueToothSerial.print(sendThreshold);
+int sendString(String sendVal){
+  sendVal = fixLen(sendVal);
+  if(!sendVal) return -1;
+  
+  blueToothSerial.print(sendVal);
   return 0;
 }
 
-int senduser_name() {
-  String sendName = user_name;
-  if (sendName.length() > 20)
-    return -1;
-
-  while (sendName.length() < 20) {
-    sendName += ' ';
-  }
-
-  blueToothSerial.print(sendName);
-  return 0;
-}
 
 int sendFunc(int c){
     switch(c){
         case 0: return sendKiDuckInfo();
-        case 1: return sendKiDuckGrowth();
-        case 2: return senduser_name();
+        case 1: return sendString(String(threshold[0]) + ' ' + String(threshold[1]) + ' ' + String(threshold[2]));
+        case 2: return sendString(user_name);
         default: return -1;
     }
 }
@@ -285,7 +256,7 @@ void bleSetup()
   //this block is waiting for connection was established.
   while (1){
     if (recvMsg(100) == 0){
-      if (recvcmp((char *)"OK+CONN")==0){
+      if (recvcmp("OK+CONN")==0){
         Serial.println("connected\r\n");
         break;
       }
@@ -297,12 +268,12 @@ void bleSetup()
 void syncApp(){
   delay(200);
   if (recvMsg(1000) == 0){
-    if      (recvcmp((char *)"AppConnected")==0)    send(COMM_INFO);
-    else if (recvcmp((char *)"InitGrowth")==0)      send(COMM_GROWTH);
-    else if (recvcmp((char *)"SetGrowth")==0)       recv(COMM_GROWTH);
-    else if (recvcmp((char *)"InitName")==0)        send(COMM_NAME);
-    else if (recvcmp((char *)"SetName")==0)         recv(COMM_NAME);
-    else if (recvcmp((char *)"OK+LOST")==0)         escape_flag = 1;
+    if      (recvcmp("AppConnected")==0)    send(COMM_INFO);
+    else if (recvcmp("InitGrowth")==0)      send(COMM_GROWTH);
+    else if (recvcmp("SetGrowth")==0)       recv(COMM_GROWTH);
+    else if (recvcmp("InitName")==0)        send(COMM_NAME);
+    else if (recvcmp("SetName")==0)         recv(COMM_NAME);
+    else if (recvcmp("OK+LOST")==0)         escape_flag = 1;
 
     Serial.print("recv: ");
     Serial.println((char *)recv_str);
