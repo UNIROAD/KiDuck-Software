@@ -31,13 +31,13 @@ void Irsetup(){
 //적외선 센서 송신 함수
 void send_ir_data(uint8_t Command, uint8_t Repeats) {
     // clip repeats at 4
-    Repeats = (Repeats > 4)?4:Repeats;
+    Repeats = (Repeats>4)?4:Repeats;
     IrSender.sendNEC(S_ADDRESS, Command, Repeats);
 }
 
 void looped_send_ir_data(uint8_t Command, uint8_t Repeats, int loop, int dt){
     for(int a=0;a<loop;a++){
-        send_ir_data(C_ACK_CMD,2); 
+        send_ir_data(Command, Repeats); 
         delay(dt);
     }
 }
@@ -55,7 +55,8 @@ int recvIr(bool startSend, bool con_cmd, uint8_t sendCom, int sendNum, bool chec
         //적외선 신호 수신
         if(!IrReceiver.decode()) continue;
 
-        if(check_new?(IrReceiver.decodedIRData.address != S_ADDRESS):(IrReceiver.decodedIRData.address==met_friend[today_met_count-1])){
+        if(check_new?(IrReceiver.decodedIRData.address!=S_ADDRESS)
+                    :(IrReceiver.decodedIRData.address==met_friend[today_met_count-1])){
             if(IrReceiver.decodedIRData.command == cmd1) return cmd1;
             else if(IrReceiver.decodedIRData.command == cmd2) return cmd2;
         }
@@ -122,14 +123,14 @@ int meet(int mode){
 
         //2. Success command 기다림
         recvIr(false, true, C_ACK_CMD, 2, false, SUCC_CMD, -1);
-        send_ir_data(S_ACK_CMD,2);
+        send_ir_data(S_ACK_CMD, 2);
         Serial.println("success!!");
 
         delay(1000);
 
         //3. Disconnect command 기다림
         recvIr(false, true, S_ACK_CMD, 1, false, DISCON_CMD, -1);
-        send_ir_data(D_ACK_CMD,4);
+        send_ir_data(D_ACK_CMD, 4);
         Serial.println("disconnect!!");
 
         looped_send_ir_data(D_ACK_CMD, 2, 5, 0);
