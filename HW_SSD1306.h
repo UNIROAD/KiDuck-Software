@@ -7,6 +7,7 @@
 #include "Global_State.h"
 #include "GUI_elements.h"
 #include "Bluetooth.h"
+#include "Friend_Meet.h"
 
 #ifndef HW_SSD
 
@@ -194,20 +195,11 @@ void duckDisplay_0(){
       .drawText(div2, "point: "+String(points) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_L)           // Point
       .drawText(div2, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 2, DIV_ALGN_L)      // Steps
       .drawText(div2, "Water: "+String(today_water) + " ", 1, SSD1306_WHITE, 1, 3, DIV_ALGN_L)      // Water
-      .drawText(div2, "Meet : "+String(today_meet_count) + " ", 1, SSD1306_WHITE, 1, 4, DIV_ALGN_L) // Meet
+      .drawText(div2, "Meet : "+String(today_met_count) + " ", 1, SSD1306_WHITE, 1, 4, DIV_ALGN_L) // Meet
       .navigationBarDisplay(" ", "meet", "menu", " ")
       .display();
 }
-
-void friendMeet_9(){
-  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
-  disp.clearDisplay()
-      .drawText(div, "Friend Meet", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
-      .navigationBarDisplay("^", "v", " ", "<-")
-      .display();
-}
-
-void syncApp_10(){
+void syncApp_9_10(){
   Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
   disp.clearDisplay()
       .drawText(div, "Synchronizing...", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
@@ -231,6 +223,37 @@ void syncBottle_11(){
       .navigationBarDisplay(" ", " ", " ", "<-")
       .display();
 }
+
+void friendMeet_12(){
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
+  disp.clearDisplay()
+      .drawText(div, "Friend Meet", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay("^", "v", " ", "<-")
+      .display();
+}
+
+void friendMeet_13_14(int mode){
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
+  disp.clearDisplay()
+      .drawText(div, "Friend Meet " + String(mode?"Recv":"Send") + " Mode", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay(" ", " ", " ", " ")
+      .display()
+      .delays(1000);
+  
+  int result = meet(mode);
+  disp.clearDisplay();
+  switch(result){
+    case 0:  disp.drawText(div, "Friend Meet " + String(mode?"Recv":"Send") + " Complete", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C); break;
+    case -1: disp.drawText(div, "You already met this friend today", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C); break;
+    default: disp.drawText(div, "Friend Meet", 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C); break;
+  }
+  disp.navigationBarDisplay(" ", " ", " ", " ")
+      .display()
+      .delays(2000);
+}
+
+
+
 
 //########################## Screen Classes ##########################//
 class ListScreen{

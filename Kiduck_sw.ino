@@ -2,6 +2,7 @@
 #include "HW_SSD1306.h"
 #include "GUI_elements.h"
 #include "Ingame_Mechanics.h"
+#include "Friend_Meet.h"
 #include <math.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -47,9 +48,17 @@ void showScreen(){
   delay(100);
   switch(screen){
     case 0:   duckDisplay_0();      break;
-    case 9:   friendMeet_9();       break;
-    case 10:  syncApp_10();         break;
+    case 9:   syncApp_9_10();
+              screenSwitchMap(0);
+              showScreen();         break;
     case 11:  syncBottle_11();      break;
+    case 12:  friendMeet_12();      break;
+    case 13:  friendMeet_13_14(0);
+              screenSwitchMap(0);
+              showScreen();         break;
+    case 14:  friendMeet_13_14(1);
+              screenSwitchMap(0);
+              showScreen();         break;
     case -1:  blankScreen();        break;
     default:  getScreen()->draw();  break;
   }
@@ -66,7 +75,7 @@ void screenSwitchHook(){
 }
 
 
-long long smap[] = {901, 5040302, 11110, 1, 1, 1, 7, 8, 0, 0, 2, 2};
+long long smap[] = {1201, 5040302, 11109, 1, 1, 1, 7, 8, 0, 10, 2, 2, 141300, 12, 12};
 void screenSwitchMap(int next){
   screenSwitchHook();
   screen = (int)(smap[screen]%((long long)ceil(pow(100, next+1)))/((long long)ceil(pow(100, next))));
@@ -77,11 +86,13 @@ void actionMap(){
   if(fall_edge(3)){
     switch(screen){
       case 0:   growth=(growth+1)%3;                      break; // delete this later
+      case 12:  screenSwitchMap(1);                       break;
       default:  getScreen()->moveBackward();              break;
     }showScreen();
   }else if(fall_edge(2)){
     switch(screen){
       case 0:   screenSwitchMap(1);                       break;
+      case 12:  screenSwitchMap(2);                       break;
       default:  getScreen()->moveForward();               break;
     }showScreen();
   }else if(fall_edge(1)){
@@ -93,9 +104,9 @@ void actionMap(){
     }showScreen();
   }else if(fall_edge(0)){
     switch(screen){
-      case 0:   break;
+      case 0: case 9: case 13: case 14:                   break;
       case 1:   screenSwitchMap(4);                       break;
-      case 1:   screenSwitchMap(4);                       break;
+      case 2:   screenSwitchMap(2);                       break;
       default:  screenSwitchMap(0);                       break;
     }showScreen();
   }else if(change_event()) showScreen();
@@ -107,6 +118,9 @@ void setup(){
   // Step counter setup
 //  LSM9DS1_setup();
 //  calibrate();
+
+  // IR setup
+  Irsetup();
 
   // Screen setup
   SSD1306_Setup();
