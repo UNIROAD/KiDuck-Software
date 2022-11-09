@@ -180,7 +180,7 @@ void blankScreen(){
       .display();
 }
 
-void textScreen(String text, String str1, String str2, String str3, String str4){
+void textScreen(String text, String str1=" ", String str2=" ", String str3=" ", String str4=" "){
   Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
   disp.clearDisplay()
       .drawText(div, text, 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
@@ -208,7 +208,7 @@ void duckDisplay_0(){
 
 
 void syncApp_9_10(){
-  textScreen("Synchronizing...", " ", " ", " ", " ");
+  textScreen("Synchronizing...");
 
   bleSetup();
   while(syncApp());
@@ -222,13 +222,13 @@ void friendMeet_12(){textScreen("Friend Meet", "^", "v", " ", "<-");}
 
 void friendMeet_13_14(int mode){
   String str = "Friend Meet " + String(mode?"Recv":"Send");
-  textScreen(str+" Mode", " ", " ", " ", " ");
+  textScreen(str+" Mode");
   
   switch(meet(mode)){
-    case 0:  textScreen(str+" Complete" , " ", " ", " ", " "); break;
-    case -1: textScreen("You already met this friend today", " ", " ", " ", " "); break;
-    case -2: textScreen("Force Exit", " ", " ", " ", " "); break;
-    default: textScreen("Friend Meet", " ", " ", " ", " "); break;
+    case 0:  textScreen(str+" Complete"); break;
+    case -1: textScreen("You already met this friend today"); break;
+    case -2: textScreen("Force Exit"); break;
+    default: textScreen("Friend Meet"); break;
   }
 }
 
