@@ -122,7 +122,7 @@ void disconnectCom(int mode){
         case RECV_MODE: //3. Disconnect command 기다림
             recvIr(false, true, S_ACK_CMD, 1, false, DISCON_CMD, -1);
             send_ir_data(D_ACK_CMD, 4);
-            looped_send_ir_data(D_ACK_CMD, 2, 5, 0);
+            looped_send_ir_data(D_ACK_CMD, 2, 5, 0); break;
         
         default: break;
     }Serial.println("disconnect!!");

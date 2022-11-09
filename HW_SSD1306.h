@@ -200,7 +200,7 @@ void duckDisplay_0(){
   disp.drawText(div2, "  "+user_name, 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R)                           // Name
       .drawText(div2, "point: "+String(points) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_L)           // Point
       .drawText(div2, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 2, DIV_ALGN_L)      // Steps
-      .drawText(div2, "Water: "+String(today_water) + " ", 1, SSD1306_WHITE, 1, 3, DIV_ALGN_L)      // Water
+      .drawText(div2, "Water: "+String((int)today_water) + " ", 1, SSD1306_WHITE, 1, 3, DIV_ALGN_L)      // Water
       .drawText(div2, "Meet : "+String(today_met_count) + " ", 1, SSD1306_WHITE, 1, 4, DIV_ALGN_L) // Meet
       .navigationBarDisplay(" ", "meet", "menu", " ")
       .display();

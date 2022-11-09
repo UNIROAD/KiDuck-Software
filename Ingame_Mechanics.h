@@ -83,6 +83,7 @@ void step_setup(){
   accelgyro.setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 
   //adjust_accelgyro();
+  step_calibrate();
 }
 
 double dist;
