@@ -35,10 +35,8 @@ protected:
   bool t_flag;
   unsigned long start_t, crit_t;
 public:
-  elapsed_time(int crit_t){
-    this->t_flag=false;
-    this->crit_t = crit_t;
-  }
+  elapsed_time(int crit_t)
+  :t_flag(false), crit_t(crit_t){}
 
   bool elapsed_time_check(){
     if(!this->t_flag){
