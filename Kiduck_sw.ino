@@ -53,10 +53,10 @@ void showScreen(){
               showScreen();         break;
     case 11:  syncBottle_11();      break;
     case 12:  friendMeet_12();      break;
-    case 13:  friendMeet_13_14(0);
+    case 13:  friendMeet_13_14(SEND_MODE);
               screenSwitchMap(0);
               showScreen();         break;
-    case 14:  friendMeet_13_14(1);
+    case 14:  friendMeet_13_14(RECV_MODE);
               screenSwitchMap(0);
               showScreen();         break;
     case -1:  blankScreen();        break;
@@ -83,13 +83,14 @@ void screenSwitchMap(int next){
 
 void actionMap(){
   /* Actions that need to happen after a button click or game state transition*/ 
+  step_clock.elapsed_time_check();
   if(fall_edge(3)){
     switch(screen){
       case 0:   growth=(growth+1)%3;                      break; // delete this later
       case 12:  screenSwitchMap(1);                       break;
       default:  getScreen()->moveBackward();              break;
     }showScreen();
-  }else if(fall_edge(2)){
+  }else if(step_clock.elapsed_time_check()&&fall_edge(2)){
     switch(screen){
       case 0:   screenSwitchMap(1);                       break;
       case 12:  screenSwitchMap(2);                       break;
@@ -116,8 +117,8 @@ void setup(){
   Serial.begin(9600);
 
   // Step counter setup
-//  LSM9DS1_setup();
-//  calibrate();
+  step_setup();
+  step_calibrate();
 
   // IR setup
   Irsetup();
@@ -134,7 +135,7 @@ void setup(){
 
 void loop(){
   // Step counter
-//  if(step_clock.elapsed_time_check()) step_count();
+  // if(step_clock.elapsed_time_check()) step_count(false);
 
   // Screen refresh & Button input process
   actionMap();

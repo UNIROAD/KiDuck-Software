@@ -7,7 +7,6 @@
 #define SEND_PIN 3      //송신기 3번 핀
 #define RECV_PIN 10     // 수신기 10번 핀
 
-int Mode_F = 0; //친구 만나기 모드, 0:신청 1:수락
 int met_friend[MAX_FRIEND]; //만났던 친구 저장하는 배열
 int today_met_count = 0; //지금까지 만난 친구
 
@@ -74,70 +73,67 @@ bool alreadyMet(){
     return false;
 }
 
+#define SEND_MODE 0
+#define RECV_MODE 1
+
+int connectComm(int mode){
+    switch(mode){
+        case SEND_MODE: //1. Connect command 전송
+            if(recvIr(true, true, COM_CMD, 2, true, C_ACK_CMD, NACK)==NACK){
+                Serial.println("You already met this friend today");
+                return -1;
+            } break;
+
+        case RECV_MODE: //1. Connect command 기다림
+            recvIr(false, false, -1, -1, true, COM_CMD, -1);
+            //이미 만났던 친구인지 확인       
+            if(alreadyMet()){
+                Serial.println("You already met this friend today");
+                looped_send_ir_data(NACK, 2, 4, 200);
+                return -1;
+            }
+            //Connect ack 전송 이후 delay(10000)을 기다리기 때문에 너무 오랜 시간 기다리는 것 방지, 이후 Delay(10000)
+            looped_send_ir_data(C_ACK_CMD, 2, 4, 200); break;
+
+        default: break;
+    }
+    met_friend[today_met_count++] = IrReceiver.decodedIRData.address; // 주소 저장 & 친구 count + 1 
+    Serial.println("Connect!!");
+}
+
+void successComm(int mode){
+    switch(mode){
+        case SEND_MODE: //2. Success command 전송
+            recvIr(true, true, SUCC_CMD, 2, false, S_ACK_CMD, -1); break;
+
+        case RECV_MODE: //2. Success command 기다림
+            recvIr(false, true, C_ACK_CMD, 2, false, SUCC_CMD, -1);
+            send_ir_data(S_ACK_CMD, 2); break;
+
+        default: break;
+    }Serial.println("success!!");
+}
+
+void disconnectCom(int mode){
+    switch(mode){
+        case SEND_MODE: //3. Disconnect command 전송
+            recvIr(true, true, DISCON_CMD, 2, false, D_ACK_CMD, -1);  break;
+        
+        case RECV_MODE: //3. Disconnect command 기다림
+            recvIr(false, true, S_ACK_CMD, 1, false, DISCON_CMD, -1);
+            send_ir_data(D_ACK_CMD, 4);
+            looped_send_ir_data(D_ACK_CMD, 2, 5, 0);
+        
+        default: break;
+    }Serial.println("disconnect!!");
+}
+
 int meet(int mode){
-    int recv_cmd;
-    //친구 요청, mode 0
-    if (mode == 0){
-        //1. Connect command 전송 
-        if(recvIr(true, true, COM_CMD, 2, true, C_ACK_CMD, NACK)==NACK){
-            Serial.println("You already met this friend today");
-            return -1;
-        }
-        met_friend[today_met_count++] = IrReceiver.decodedIRData.address; // 주소 저장 & 친구 count + 1 
-        Serial.println("Connect!!");
-
-        //delay를 주어 다음 신호 전송까지 시간 간격을 둠, 너무 빨리 통신이 이루어지는 것 방지
-        Serial.println("delay start");
-        delay(10000);
-        
-        //2. Success command 전송
-        recvIr(true, true, SUCC_CMD, 2, false, S_ACK_CMD, -1);
-        Serial.println("success!!");
-
-        delay(1000);
-
-        //3. Disconnect command 전송
-        recvIr(true, true, DISCON_CMD, 2, false, D_ACK_CMD, -1);
-        Serial.println("Disconnect!!");
-    }
-
-  
-    //친구 수락, mode 1
-    else{
-        //Connect command 기다림
-        recvIr(false, false, -1, -1, true, COM_CMD, -1);
-        //이미 만났던 친구인지 확인       
-        if(alreadyMet()){
-            Serial.println("You already met this friend today");
-            looped_send_ir_data(NACK, 2, 4, 200);
-            return -1;
-        }
-        met_friend[today_met_count++] = IrReceiver.decodedIRData.address;
-        
-        //Connect ack 전송 이후 delay(10000)을 기다리기 때문에 너무 오랜 시간 기다리는 것 방지, 이후 Delay(10000)
-        looped_send_ir_data(C_ACK_CMD, 2, 4, 200);
-        Serial.println("connect!!");
-
-        Serial.println("delay start");
-        delay(9000);
-
-        //2. Success command 기다림
-        recvIr(false, true, C_ACK_CMD, 2, false, SUCC_CMD, -1);
-        send_ir_data(S_ACK_CMD, 2);
-        Serial.println("success!!");
-
-        delay(1000);
-
-        //3. Disconnect command 기다림
-        recvIr(false, true, S_ACK_CMD, 1, false, DISCON_CMD, -1);
-        send_ir_data(D_ACK_CMD, 4);
-        Serial.println("disconnect!!");
-
-        looped_send_ir_data(D_ACK_CMD, 2, 5, 0);
-    }
-
-  //친구 만나기 종료
-  Serial.println("finish");
+    //delay를 주어 다음 신호 전송까지 시간 간격을 둠, 너무 빨리 통신이 이루어지는 것 방지
+    if(connectComm(mode)==-1) return -1; delay(10000);
+    successComm(mode); delay(1000);
+    disconnectCom(mode);
+    Serial.println("finish");   //친구 만나기 종료
 }
 
 #define FRNDMEET
