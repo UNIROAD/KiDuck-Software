@@ -4,7 +4,7 @@
 #include <Adafruit_SSD1306.h>
 
 #include "Ingame_Mechanics.h"
-#include "Global_State.h"
+#include "Kiduck_utility.h"
 #include "GUI_elements.h"
 #include "Bluetooth.h"
 #include "Friend_Meet.h"

@@ -1,4 +1,4 @@
-#include "Global_State.h"
+#include "Kiduck_utility.h"
 #include "HW_SSD1306.h"
 #include "GUI_elements.h"
 #include "Ingame_Mechanics.h"

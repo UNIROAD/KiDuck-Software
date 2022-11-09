@@ -3,7 +3,7 @@
 #include <Wire.h>
 #include <I2Cdev.h>
 #include <MPU6050.h>
-#include "Global_State.h"
+#include "Kiduck_utility.h"
 
 #ifndef GAMEM
 using namespace std;
@@ -45,7 +45,7 @@ void update_points(){
 MPU6050 accelgyro;
 //설정 값들
 #define WORKING_THRESHOLD 0.4
-#define UPPER_THRESHOLD 1
+#define UPPER_THRESHOLD 2
 
 elapsed_time step_clock = elapsed_time(20);
 int16_t ax, ay, az, gx, gy, gz;

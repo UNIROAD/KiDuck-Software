@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>   //Software Serial Port
 #include <ArduinoSTL.h>
-#include "Global_State.h"
+#include "Kiduck_utility.h"
 
 #ifndef BLE
 
