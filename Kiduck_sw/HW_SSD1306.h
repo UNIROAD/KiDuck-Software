@@ -265,8 +265,8 @@ public:
                   div.getSectHeight(), 
                   SSD1306_WHITE);
 
-    // each entry
-    for(int i=0;i<ls.getVisibleLen();i++)
+    // each entry, print until list len if list len is smaller than visible len
+    for(int i=0;i<min(ls.getVisibleLen(), ls.getLen());i++)
       disp.drawText(div, ls.getVisibleText(i), 1, 
                    (i==ls.getCursorPos())?SSD1306_BLACK:SSD1306_WHITE,  
                    0, i, DIV_ALGN_L)

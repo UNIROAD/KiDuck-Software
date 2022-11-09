@@ -31,6 +31,7 @@ public:
     Scroller(int width, int height, int x_pos, int y_pos, int length, int visible_len, int curr)
     : UI_element(width, height, x_pos, y_pos), length(length), visible_len(visible_len), curr(curr){}
 
+    int getLen(){return this->length;}
     int getVisibleLen(){return this->visible_len;}
     int getCurr(){return this->curr;}
 
@@ -152,7 +153,8 @@ public:
 
     void moveForward(){
         // moves cursor if cursor isn't at the bottom of the screen
-        if(this->cursor_pos<this->visible_len-1){
+        // cursor stops when list len is shorter than visible len
+        if(this->cursor_pos<this->visible_len-1 && this->cursor_pos<this->length-1){
             this->cursor_pos++;
             this->curr++;
         }
