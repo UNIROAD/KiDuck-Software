@@ -65,11 +65,11 @@ void showScreen(){
 }
 
 void screenSwitchHook(){
+  if(screen==8) setting_flag=true;
   switch(screen){
     case 3: case 6: if(getScreen()->not_empty())    user_name = getScreen()->flush(); break;
     case 4: case 7: if(getScreen()->not_empty())     user_age = getScreen()->flush().toInt(); break;
     case 5: case 8: if(getScreen()->not_empty())  user_weight = getScreen()->flush().toInt(); break;
-    case -1: startupDisplay();
     default: break;
   }
 }
@@ -81,62 +81,82 @@ void screenSwitchMap(int next){
   screen = (int)(smap[screen]%((long long)ceil(pow(100, next+1)))/((long long)ceil(pow(100, next))));
 }
 
-void actionMap(){
+void actionMap(int event_type){
   /* Actions that need to happen after a button click or game state transition*/ 
-  step_clock.elapsed_time_check();
-  if(fall_edge(3)){
-    switch(screen){
-      case 0:   growth=(growth+1)%3;                      break; // delete this later
-      case 12:  screenSwitchMap(1);                       break;
-      default:  getScreen()->moveBackward();              break;
-    }showScreen();
-  }else if(step_clock.elapsed_time_check()&&fall_edge(2)){
-    switch(screen){
-      case 0:   screenSwitchMap(1);                       break;
-      case 12:  screenSwitchMap(2);                       break;
-      default:  getScreen()->moveForward();               break;
-    }showScreen();
-  }else if(fall_edge(1)){
-    switch(screen){
-      case 0:   screenSwitchMap(0);                       break;
-      case 1:   screenSwitchMap(getScreen()->getCurr());  break;
-      case 2:   screenSwitchMap(getScreen()->getCurr());  break;
-      default:  getScreen()->enter();                     break;
-    }showScreen();
-  }else if(fall_edge(0)){
-    switch(screen){
-      case 0: case 9: case 13: case 14:                   break;
-      case 1:   screenSwitchMap(4);                       break;
-      case 2:   screenSwitchMap(2);                       break;
-      default:  screenSwitchMap(0);                       break;
-    }showScreen();
-  }else if(change_event()) showScreen();
+  switch(event_type){
+    case 3:
+      switch(screen){
+        case 0:   growth=(growth+1)%3;                      break; // delete this later
+        case 12:  screenSwitchMap(1);                       break;
+        default:  getScreen()->moveBackward();              break;
+      } break;
+    case 2:
+      switch(screen){
+        case 0:   screenSwitchMap(1);                       break;
+        case 12:  screenSwitchMap(2);                       break;
+        default:  getScreen()->moveForward();               break;
+      } break;
+    case 1:
+      switch(screen){
+        case 0:   screenSwitchMap(0);                       break;
+        case 1:   screenSwitchMap(getScreen()->getCurr());  break;
+        case 2:   screenSwitchMap(getScreen()->getCurr());  break;
+        default:  getScreen()->enter();                     break;
+      } break;
+    case 0:
+      switch(screen){
+        case 0: case 9: case 13: case 14:                   break;
+        case 1:   screenSwitchMap(4);                       break;
+        case 2:   screenSwitchMap(2);                       break;
+        default:  screenSwitchMap(0);                       break;
+      } break;
+  }
+}
+
+bool event(){
+  /*Checks if meaningful events happens, Run procedures necessary*/
+
+  // if display is off, don't read button input
+  if(!disp_on){
+    if(disp_edge(false)){ // if display switch is flipped to on, turn on screen
+      startupDisplay();           // Loading screen
+      screen = setting_flag?0:6;  // setting complete -> Main screen / else -> init_settings
+      return true;
+    }
+    return false;
+  }
+
+  int button = button_check();
+  if(button!=-1){
+    actionMap(button);
+    return true;
+  }else if(disp_edge(true)){
+    startupDisplay();   // Loading screen
+    screen = -1;        // Blank screen
+    return true;
+  }else if(change_event()) return true;
+
+  return false;
 }
 
 void setup(){
   Serial.begin(9600);
 
-  // Step counter setup
-  step_setup();
-  step_calibrate();
+  SSD1306_Setup();    // Screen setup
+  startupDisplay();   // Loading screen
 
-  // IR setup
-  Irsetup();
+  step_setup();       // Step counter setup
+  Irsetup();          // IR setup
+  setButtonPinMode(); // Button setup
+  setDisplaySwitchPinMode(); // Display Switch setup
 
-  // Screen setup
-  SSD1306_Setup();
-  startupDisplay();
-  showScreen();
-
-  // Button setup
-  setButtonPinMode();
-  pinMode(LED_BUILTIN, OUTPUT);
+  showScreen();       // show first screen
 }
 
 void loop(){
   // Step counter
   // if(step_clock.elapsed_time_check()) step_count(false);
-
-  // Screen refresh & Button input process
-  actionMap();
+  
+  // show screen if event occurs
+  if(event()) showScreen();
 }

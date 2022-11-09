@@ -6,6 +6,7 @@
 using namespace std;
 
 //############# Game Datas #############//
+bool setting_flag = false;
 String user_name;
 int user_age;
 int user_weight;
@@ -26,6 +27,13 @@ bool fall_edge(int num){
   previn[num] = currin[num];
   currin[num] = (bool)digitalRead(num+6);
   return previn[num] && !currin[num];
+}
+
+int button_check(){
+  for(int i=3;i>=0;i--){
+    if(fall_edge(i)) return i;
+  }
+  return -1;
 }
 
 
@@ -50,7 +58,24 @@ public:
   }
 };
 
+//############# Disp on/off #############//
+#define DISP_PIN 21
 
+bool disp_on = true;
+bool prev_disp_on = true;
+
+void setDisplaySwitchPinMode(){pinMode(DISP_PIN, INPUT_PULLUP);}
+
+void read_disp_on(){
+  prev_disp_on = disp_on;
+  disp_on = (bool)digitalRead(DISP_PIN);
+}
+
+bool disp_edge(bool fall){
+  read_disp_on();
+  if(fall) return prev_disp_on && !disp_on;
+  else return disp_on && !prev_disp_on;
+}
 
 //############# Duck Image #############//
 #define DUCK_HEIGHT   0x32
