@@ -1,5 +1,8 @@
 #include <Arduino_LSM9DS1.h>
 #include <ArduinoSTL.h>
+#include <Wire.h>
+#include <I2Cdev.h>
+#include <MPU6050.h>
 #include "Global_State.h"
 
 #ifndef GAMEM
@@ -20,7 +23,7 @@ const int WATER_PT = 100;
 //############# Game Datas #############//
 int points = 0;
 
-int today_steps;
+int today_steps = 0;
 int today_meet_count;
 float today_water;
 
@@ -38,70 +41,85 @@ void update_points(){
 }
 
 //############# Step Counter #############//
-elapsed_time step_clock = elapsed_time(500);
-float step_thrshld = 0.6;
+
+MPU6050 accelgyro;
+//설정 값들
+#define WORKING_THRESHOLD 0.3
+
+elapsed_time step_clock = elapsed_time(20);
+int16_t ax, ay, az, gx, gy, gz;
 float xavg, yavg, zavg;
+
 bool st_flag = false;
+bool st_event = false;
+
+
+void step_calibrate(){
+  float sumx=0;
+  float sumy=0;
+  float sumz=0;
+
+  for(int i=0;i<100;i++){
+    accelgyro.getMotion6(&ax,&ay,&az,&gz,&gy,&gz);
+    sumx+=ax/16384.0; sumy+=ay/16384.0; sumz+=az/16384.0;
+  }
+  xavg=sumx/100.0; yavg=sumy/100.0; zavg=sumz/100.0;
+}
+
+void adjust_accelgyro(){
+  Serial.println("Updating internal sensor offset...");
+  accelgyro.setXAccelOffset(-950);
+  accelgyro.setYAccelOffset(-5200);
+  accelgyro.setZAccelOffset(-920);
+  accelgyro.setXGyroOffset(20);
+  accelgyro.setYGyroOffset(56);
+  accelgyro.setZGyroOffset(-85);
+}
+
+void step_setup(){
+  accelgyro.initialize();
+
+  accelgyro.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
+  accelgyro.setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
+
+  //adjust_accelgyro();
+}
+
+double dist;
+
+void step_count(bool hasd){
+  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+  double fax=ax/16384.0-xavg;
+  double fay=ay/16384.0-yavg;
+  double faz=az/16384.0-zavg;
+
+  dist = sqrt(fax*fax+fay*fay+faz*faz);
+  double major_factor= max(fax,max(fay,faz));
+  bool is_working = dist > WORKING_THRESHOLD;
+
+  Serial.print("Variable_1:");Serial.print(dist);
+  Serial.print(",Variable_2:");Serial.print(major_factor);
+  Serial.print(",Variable_3:");Serial.print(WORKING_THRESHOLD);
+  Serial.print(",Variable_4:");Serial.println((int)(is_working&&st_flag == 0&&major_factor >0));
+  
+  st_event = is_working && !st_flag && major_factor>0;
+  if(st_event){
+    today_steps++;
+    st_flag=true;
+    Serial.print("step="); Serial.println(today_steps);
+    delay(200);
+  }
+  if(!is_working && st_flag) st_flag=false;
+
+  if(hasd) delay(20);
+}
 
 
 void step_reset(){
     step_counts.push_back(today_steps);
     today_steps = 0;
 }
-
-
-void LSM9DS1_setup(){
-//  while (!Serial);
-//  Serial.println("Started");
-
-  if (!IMU.begin()) {
-     Serial.println("Failed to initialize IMU!");
-    while (1);
-  }
-
-   Serial.print("Accelerometer sample rate = ");
-   Serial.print(IMU.accelerationSampleRate());
-   Serial.println("Hz"); 
-}
-
-void calibrate(){
-  float xval, yval, zval;
-  
-  for (int i = 0; i < 100; i++) {
-    if (IMU.accelerationAvailable()) IMU.readAcceleration(xval, yval, zval);
-    xavg+= xval; yavg+= yval; zavg+= zval;
-  }
-  
-  delay(100);
-  xavg /= 100.0; yavg /= 100.0; zavg /= 100.0;
-  Serial.println(xavg); Serial.println(yavg); Serial.println(zavg);
-}
-
-void step_count(){
-    float totvect = 0, prev_totvect = 0;
-    float totave = 0;
-    float xaccl = 0, yaccl = 0, zaccl = 0;
-
-    if (IMU.accelerationAvailable()) IMU.readAcceleration(xaccl, yaccl, zaccl);
-    xaccl-=xavg; yaccl-=yavg; zaccl-=zavg;
-    
-    totvect = sqrt(xaccl*xaccl + yaccl*yaccl + zaccl*zaccl);
-    totave = (totvect + prev_totvect) / 2 ;
-    prev_totvect = totvect;
-
-//    Serial.println("totave"); Serial.println(totave);
-
-    if(totave>step_thrshld && !st_flag){
-        today_steps++;
-        st_flag = true;
-    }
-
-    if(totave<step_thrshld && st_flag) st_flag = false;
-    if(today_steps<0) today_steps = 0;
-
-//    Serial.println('\n'); Serial.print("steps: "); Serial.println(steps);
-}
-
 
 
 //############# Friend Meeting #############//
@@ -153,7 +171,7 @@ bool water_update(float curr_water_level){
 
 
 bool change_event(){
-    return st_flag;
+    return st_event;
 }
 
 #define GAMEM
