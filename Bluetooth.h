@@ -31,9 +31,6 @@ int threshold[3] = {10000, 1500, 5};
 String password = "abcdefg";
 int emergencyAlarm = 0;
 
-int escape_flag = 0;
-
-
 //########################## string ##########################//
 
 //compare given string with recv_str
@@ -121,40 +118,12 @@ int setupBlueToothConnection(){
 
 
 //########################## Send ##########################//
-int sendKiDuckInfo() {
-  String sendName = user_name;
-  if (sendName.length() > 20)
-    return -1;
 
-  while (sendName.length() < 20) {
-    sendName += ' ';
-  }
-
-  String sendDataCount(dataCount);
-  if (sendDataCount.length() > 20)
-    return -1;
-
-  while (sendDataCount.length() < 20) {
-    sendDataCount += ' ';
-  }
-
-  std::vector<String> sendData(dataCount);
-  for (int i = 0; i < dataCount; i++) {
-    sendData[i] = String(data[i][0]) + ' ' + String(data[i][1]) + ' ' + String(data[i][2]);
-    if (sendData[i].length() > 20)
-      return -1;
-
-    while (sendData[i].length() < 20) {
-      sendData[i] += ' ';
-    }
-  }
-
-  blueToothSerial.print(sendName);
-  blueToothSerial.print(sendDataCount);
-  for (int i = 0; i < dataCount; i++) {
-    blueToothSerial.print(sendData[i]);
-  }
-  return 0;
+String strJoin(String str1, String str2, String str3){
+  return str1 + " " + str2 + " " + str3;
+}
+String strJoin(int str1, int str2, int str3){
+  return String(str1) + " " + String(str2) + " " + String(str3);
 }
 
 String fixLen(String sendVal){
@@ -175,12 +144,34 @@ int sendString(String sendVal){
   return 0;
 }
 
+int sendKiDuckInfo() {
+  String sendName = fixLen(user_name);
+  if(!sendName) return -1;
+
+  String sendDataCount = fixLen(String(dataCount));
+  if(!sendDataCount) return -1;
+
+  std::vector<String> sendData(dataCount);
+  for (int i = 0; i < dataCount; i++) {
+    sendData[i] = fixLen(strJoin(data[i][0], data[i][1], data[i][2]));
+    if(!sendData[i]) return -1;
+  }
+
+  blueToothSerial.print(sendName);
+  blueToothSerial.print(sendDataCount);
+  for (int i = 0; i < dataCount; i++) {
+    blueToothSerial.print(sendData[i]);
+  }
+  return 0;
+}
+
+
 
 int sendFunc(int c){
     switch(c){
-        case 0: return sendKiDuckInfo();
-        case 1: return sendString(String(threshold[0]) + ' ' + String(threshold[1]) + ' ' + String(threshold[2]));
-        case 2: return sendString(user_name);
+        case COMM_INFO:   return sendKiDuckInfo();
+        case COMM_GROWTH: return sendString(strJoin(threshold[0], threshold[1], threshold[2]));
+        case COMM_NAME:   return sendString(user_name);
         default: return -1;
     }
 }
@@ -193,20 +184,17 @@ int parseGrowth() {
   String strCommCriteria = "";
 
   int type = 0; // 0: step, 1: drink, 2: communication
-  for (int curi = 0;recv_str[curi] != '\0';curi++) {
+  for (int curi = 0; recv_str[curi]!='\0';curi++) {
     if (recv_str[curi] == ' ') type++;
     else if (recv_str[curi] >= '0' && recv_str[curi] <= '9') {
         switch(type){
-            case 0: strStepCriteria += recv_str[curi]; break;
-            case 1: strDrinkCriteria += recv_str[curi]; break;
+            case 0:  strStepCriteria += recv_str[curi]; break;
+            case 1:  strDrinkCriteria += recv_str[curi]; break;
             default: strCommCriteria += recv_str[curi]; break;
         }
     }else return -1;
   }
-  Serial.println("update criteria:");
-  Serial.println(strStepCriteria);
-  Serial.println(strDrinkCriteria);
-  Serial.println(strCommCriteria);
+  Serial.println("update criteria: " + strJoin(strStepCriteria, strDrinkCriteria, strCommCriteria));
 
   threshold[0] = strStepCriteria.toInt();
   threshold[1] = strDrinkCriteria.toInt();
@@ -226,12 +214,14 @@ int parseName() {
 
 int parseFunc(int c){
     switch(c){
-        case 1: return parseGrowth();
-        case 2: return parseName();
+        case COMM_GROWTH: return parseGrowth();
+        case COMM_NAME:   return parseName();
         default: return -1;
     }
 }
 
+
+//########################## Bluetooth ##########################//
 void send(int c){
     if (sendFunc(c) == -1) 
         blueToothSerial.print("Fail to send        ");
@@ -240,32 +230,29 @@ void send(int c){
 void recv(int c){
     blueToothSerial.print("ACK");
     if (recvMsg(1000)) return;
-    if (parseFunc(c) == 0)
+    if (parseFunc(c)==0)
         blueToothSerial.print("SUCCESS");
     else
         blueToothSerial.print("FAIL");
 }
 
 
-void bleSetup()
-{
+void bleSetup(){
   pinMode(RxD, INPUT);    //UART pin for Bluetooth
   pinMode(TxD, OUTPUT);   //UART pin for Bluetooth
   Serial.println("\r\nPower on!!");
   setupBlueToothConnection(); //initialize Bluetooth
   //this block is waiting for connection was established.
   while (1){
-    if (recvMsg(100) == 0){
-      if (recvcmp("OK+CONN")==0){
-        Serial.println("connected\r\n");
-        break;
-      }
-    }
     delay(200);
+    if (recvMsg(100)!= 0) continue;
+    if (recvcmp("OK+CONN")!=0) continue;
+    break;
   }
+  Serial.println("connected\r\n");
 }
 
-void syncApp(){
+bool syncApp(){
   delay(200);
   if (recvMsg(1000) == 0){
     if      (recvcmp("AppConnected")==0)    send(COMM_INFO);
@@ -273,11 +260,12 @@ void syncApp(){
     else if (recvcmp("SetGrowth")==0)       recv(COMM_GROWTH);
     else if (recvcmp("InitName")==0)        send(COMM_NAME);
     else if (recvcmp("SetName")==0)         recv(COMM_NAME);
-    else if (recvcmp("OK+LOST")==0)         escape_flag = 1;
+    else if (recvcmp("OK+LOST")==0)         return false;
 
     Serial.print("recv: ");
     Serial.println((char *)recv_str);
   }
+  return true;
 }
 
 #define BLE

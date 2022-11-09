@@ -76,6 +76,12 @@ public:
                       .print(text);
     }
 
+    displaySequence selectRect(bool sel, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color){
+      if(sel) (*dp()).fillRect(x, y, w, h, color);
+      else    (*dp()).drawRect(x, y, w, h, color);
+      return *this;
+    }
+
     //############ UI Components ############//
     /*String length less than 2 is recommended
     draws on top of whatever is on the screen*/
@@ -120,22 +126,14 @@ displaySequence disp(&display);
 
 //########################## UI Component Functions ##########################//
 // function that displays set of rectangle Button
-void _sbutton(bool selected, Div div, int x_num, int y_num, String text){
-  if(selected){
-   disp.fillRect(div.pos(x_num, DIV_DIR_W, DIV_PAD_O),
-                   div.pos(y_num, DIV_DIR_H, DIV_PAD_O),
-                   div.getSectWidth(),
-                   div.getSectHeight(),
-                   SSD1306_WHITE);
-  }
-  else{
-   disp.drawRect(div.pos(x_num, DIV_DIR_W, DIV_PAD_O),
-                    div.pos(y_num, DIV_DIR_H, DIV_PAD_O),
-                    div.getSectWidth(),
-                    div.getSectHeight(),
-                    SSD1306_WHITE);
-  }
-  disp.drawText(div, text, 1, (selected)?SSD1306_BLACK:SSD1306_WHITE, x_num, y_num, DIV_ALGN_C);
+void _drawButton(bool selected, Div div, int x_num, int y_num, String text){
+  disp.selectRect(selected,
+                  div.pos(x_num, DIV_DIR_W, DIV_PAD_O),
+                  div.pos(y_num, DIV_DIR_H, DIV_PAD_O),
+                  div.getSectWidth(),
+                  div.getSectHeight(),
+                  SSD1306_WHITE)
+      .drawText(div, text, 1, (selected)?SSD1306_BLACK:SSD1306_WHITE, x_num, y_num, DIV_ALGN_C);
 }
 
 
@@ -143,8 +141,8 @@ void rectButtonSetDisplay(int num){
   Div div = Div(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 2, 4, 3);
   display.clearDisplay();
   
-  _sbutton((bool)(num%2), div, 0, -2, "enter");
-  _sbutton((bool)(num/2), div, 1, -2, "delete");
+  _drawButton((bool)(num%2), div, 0, -2, "enter");
+  _drawButton((bool)(num/2), div, 1, -2, "delete");
   
   disp.setTextSize(1)
       .setTextColor(SSD1306_WHITE)
@@ -182,6 +180,14 @@ void blankScreen(){
       .display();
 }
 
+void textScreen(String text, String str1, String str2, String str3, String str4){
+  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
+  disp.clearDisplay()
+      .drawText(div, text, 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
+      .navigationBarDisplay(str1, str2, str3, str4)
+      .display();
+}
+
 void duckDisplay_0(){
   Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 1, 2);
   Div div2(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 2, 5, 2);
@@ -200,41 +206,31 @@ void duckDisplay_0(){
       .display();
 }
 
-void simpleTextScreen(String text, String str1, String str2, String str3, String str4){
-  Div div(SCREEN_WIDTH, SCREEN_HEIGHT*4/5, 0, 0, 1, 1, 2);
-  disp.clearDisplay()
-      .drawText(div, text, 1, SSD1306_WHITE, 0, 0, DIV_ALGN_C)
-      .navigationBarDisplay(str1, str2, str3, str4)
-      .display();
-}
 
 void syncApp_9_10(){
-  simpleTextScreen("Synchronizing...", " ", " ", " ", " ")
+  textScreen("Synchronizing...", " ", " ", " ", " ");
 
   bleSetup();
-  while(!escape_flag) syncApp();
-  escape_flag = 0;
-
-  simpleTextScreen("Complete", " ", " ", " ", "<-")
+  while(syncApp());
+  
+  textScreen("Complete", " ", " ", " ", "<-");
 }
 
-void syncBottle_11(){simpleTextScreen("Sync with Bottle", " ", " ", " ", "<-")}
+void syncBottle_11(){textScreen("Sync with Bottle", " ", " ", " ", "<-");}
 
-void friendMeet_12(){simpleTextScreen("Friend Meet", "^", "v", " ", "<-")}
+void friendMeet_12(){textScreen("Friend Meet", "^", "v", " ", "<-");}
 
 void friendMeet_13_14(int mode){
   String str = "Friend Meet " + String(mode?"Recv":"Send");
-  simpleTextScreen(str+" Mode", " ", " ", " ", " ")
+  textScreen(str+" Mode", " ", " ", " ", " ");
   
   switch(meet(mode)){
-    case 0:  simpleTextScreen(str+" Complete" , " ", " ", " ", " "); break;
-    case -1: simpleTextScreen("You already met this friend today", " ", " ", " ", " "); break;
-    case -2: simpleTextScreen("Force Exit", " ", " ", " ", " "); break;
-    default: simpleTextScreen("Friend Meet", " ", " ", " ", " "); break;
+    case 0:  textScreen(str+" Complete" , " ", " ", " ", " "); break;
+    case -1: textScreen("You already met this friend today", " ", " ", " ", " "); break;
+    case -2: textScreen("Force Exit", " ", " ", " ", " "); break;
+    default: textScreen("Friend Meet", " ", " ", " ", " "); break;
   }
 }
-
-
 
 
 //########################## Screen Classes ##########################//
