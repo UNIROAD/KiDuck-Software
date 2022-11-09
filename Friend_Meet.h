@@ -17,7 +17,7 @@ void Irsetup(){
 }
 
 //comand 및 address 정의
-#define S_ADDRESS 0x0001
+#define S_ADDRESS 0x0002
 
 #define COM_CMD     0x01
 #define SUCC_CMD    0x02
@@ -67,7 +67,6 @@ int recvIr(bool startSend, bool con_cmd, uint8_t sendCom, int sendNum, bool chec
 bool alreadyMet(){
     int recv_cmd = IrReceiver.decodedIRData.address;
     for (int j = 0; j < MAX_FRIEND; j++) {
-        Serial.println(j);
         if(recv_cmd == met_friend[j]) return true;
     }
     return false;
@@ -99,6 +98,7 @@ int connectComm(int mode){
     }
     met_friend[today_met_count++] = IrReceiver.decodedIRData.address; // 주소 저장 & 친구 count + 1 
     Serial.println("Connect!!");
+    return 0;
 }
 
 void successComm(int mode){
@@ -122,7 +122,7 @@ void disconnectCom(int mode){
         case RECV_MODE: //3. Disconnect command 기다림
             recvIr(false, true, S_ACK_CMD, 1, false, DISCON_CMD, -1);
             send_ir_data(D_ACK_CMD, 4);
-            looped_send_ir_data(D_ACK_CMD, 2, 5, 0); break;
+            looped_send_ir_data(D_ACK_CMD, 2, 5, 200); break;
         
         default: break;
     }Serial.println("disconnect!!");
@@ -134,6 +134,7 @@ int meet(int mode){
     successComm(mode); delay(1000);
     disconnectCom(mode);
     Serial.println("finish");   //친구 만나기 종료
+    return 0;
 }
 
 #define FRNDMEET
