@@ -155,7 +155,7 @@ void setup(){
 
 void loop(){
   // Step counter
-  // if(step_clock.elapsed_time_check()) step_count(false);
+  if(!disp_on && step_clock.elapsed_time_check()) step_count(false);
   
   // show screen if event occurs
   if(event()) showScreen();

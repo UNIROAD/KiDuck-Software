@@ -44,11 +44,15 @@ void update_points(){
 
 MPU6050 accelgyro;
 //설정 값들
-#define WORKING_THRESHOLD 0.3
+#define WORKING_THRESHOLD 0.4
+#define UPPER_THRESHOLD 1
 
 elapsed_time step_clock = elapsed_time(20);
 int16_t ax, ay, az, gx, gy, gz;
 float xavg, yavg, zavg;
+float xcurr, ycurr, zcurr;
+float xprev, yprev, zprev;
+float xcal, ycal, zcal;
 
 bool st_flag = false;
 bool st_event = false;
@@ -84,6 +88,8 @@ void step_setup(){
 
   //adjust_accelgyro();
   step_calibrate();
+
+  xcurr = 0; ycurr = 0; zcurr = 0;
 }
 
 double dist;
@@ -91,18 +97,19 @@ double dist;
 void step_count(bool hasd){
   accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-  double fax=ax/16384.0-xavg;
-  double fay=ay/16384.0-yavg;
-  double faz=az/16384.0-zavg;
+  xprev = xcurr; yprev = ycurr; zprev = zcurr;
+  xcurr=ax/16384.0-xavg; ycurr=ay/16384.0-yavg; zcurr=az/16384.0-zavg;
+  xcal=xcurr-xprev;ycal=ycurr-yprev;zcal=zcurr-zprev;
 
-  dist = sqrt(fax*fax+fay*fay+faz*faz);
-  double major_factor= max(fax,max(fay,faz));
-  bool is_working = dist > WORKING_THRESHOLD;
+  dist = sqrt(xcal*xcal+ycal*ycal+zcal*zcal);
+  double major_factor= max(xcurr,max(ycurr,zcurr));
+  bool is_working = WORKING_THRESHOLD < dist && dist < UPPER_THRESHOLD;
 
   Serial.print("Variable_1:");Serial.print(dist);
   Serial.print(",Variable_2:");Serial.print(major_factor);
   Serial.print(",Variable_3:");Serial.print(WORKING_THRESHOLD);
-  Serial.print(",Variable_4:");Serial.println((int)(is_working&&st_flag == 0&&major_factor >0));
+  Serial.print(",Variable_4:");Serial.print(UPPER_THRESHOLD);
+  Serial.print(",Variable_5:");Serial.println((int)(is_working&&st_flag == 0&&major_factor >0));
   
   st_event = is_working && !st_flag && major_factor>0;
   if(st_event){
