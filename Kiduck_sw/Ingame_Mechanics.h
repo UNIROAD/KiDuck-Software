@@ -98,7 +98,7 @@ void step_count(bool hasd){
   accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
   xprev = xcurr; yprev = ycurr; zprev = zcurr;
-  xcurr=ax/16384.0-xavg; ycurr=ay/16384.0-yavg; zcurr=az/16384.0-zavg;
+  xcurr=ax/16384.0; ycurr=ay/16384.0; zcurr=az/16384.0;
   xcal=xcurr-xprev;ycal=ycurr-yprev;zcal=zcurr-zprev;
 
   dist = sqrt(xcal*xcal+ycal*ycal+zcal*zcal);
