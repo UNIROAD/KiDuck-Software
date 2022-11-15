@@ -1,6 +1,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <ArduinoSTL.h>
+#include <SoftwareSerial.h>   //Software Serial Port
 
 #ifndef GLST
 using namespace std;
@@ -58,7 +59,7 @@ public:
   }
 };
 
-//############# Disp on/off #############//
+//############# Disp on/off control #############//
 #define DISP_PIN 21
 
 bool disp_on = true;
@@ -76,6 +77,103 @@ bool disp_edge(bool fall){
   if(fall) return prev_disp_on && !disp_on;
   else return disp_on && !prev_disp_on;
 }
+
+//############# BLE #############//
+
+#define RxD 4
+#define TxD 5
+
+SoftwareSerial blueToothSerial(RxD, TxD); //the software serial port
+
+char recv_str[100];
+char nextChar = "";
+
+char readChar();
+int recvMsg(unsigned int timeout);
+int recvcmp(const char *str);
+int strcmp(char *a, const char *b);
+String strJoin(String str1, String str2, String str3);
+String strJoin(int str1, int str2, int str3);
+String fixLen(String sendVal);
+
+//receive message from Bluetooth with time out
+int recvMsg(unsigned int timeout=1000){
+  //wait for feedback
+  unsigned char num;
+  unsigned char len = 100;
+  int i = 0;
+
+  //waiting for the first character with time out
+  for(unsigned int time = 0;!blueToothSerial.available();time++){
+    delay(50);
+    if (time > (timeout / 50)) return -1;
+  }
+
+  //read other characters from uart buffer to string
+  for(;blueToothSerial.available() && (i < 100);i++)
+    recv_str[i] = char(blueToothSerial.read());
+
+  recv_str[i] = '\0';
+
+  return 0;
+}
+
+int recvcmp(const char *str) {return strcmp((char *)recv_str, str);}
+
+int strcmp(char *a, const char *b){
+  for(unsigned int ptr = 0; a[ptr] != '\0'; ptr++){
+    if (a[ptr] != b[ptr]) return -1;
+  }
+  return 0;
+}
+
+String strJoin(String str1, String str2, String str3){
+  return str1 + " " + str2 + " " + str3;
+}
+String strJoin(int str1, int str2, int str3){
+  return String(str1) + " " + String(str2) + " " + String(str3);
+}
+
+String fixLen(String sendVal){
+  if (sendVal.length() > 20)
+    return "";
+
+  while (sendVal.length() < 20) {
+    sendVal += ' ';
+  }
+  return sendVal;
+}
+
+//send command to Bluetooth and return if there is a response received
+int sendBlueToothCommand(char command[], int timeout = 200){
+  Serial.print("send: "); Serial.println(command);
+
+  blueToothSerial.print(command);
+  delay(300);
+
+  if (recvMsg(timeout) != 0) return -1;
+
+  Serial.print("recv: "); Serial.println(recv_str);
+  return 0;
+}
+
+// Compare Message to Characters which are collected by readChar()
+bool cmpMsg(String msg, bool refresh=true){
+    if(refresh) nextChar = readChar();
+
+    if(nextChar != msg[0]) return false;
+    for(int i=1;i<msg.length();i++){
+        if(readChar() != msg[i]) return false;
+    }
+    return true;
+}
+
+// Read only one Character from BLE connection
+char readChar(){  
+  while(!blueToothSerial.available());
+  return char(blueToothSerial.read());
+}
+
 
 //############# Duck Image #############//
 #define DUCK_HEIGHT   0x32

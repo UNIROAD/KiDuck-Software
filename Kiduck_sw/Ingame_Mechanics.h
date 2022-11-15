@@ -31,6 +31,23 @@ vector<int> step_counts = {};
 vector<int> meet_count = {};
 vector<int> water_drink = {};
 
+//##########################################
+int dataCount = 8;
+int data[8][3] = { // first index: day, second index: 0-step count 1-drink 2-communication
+  {2991, 2000, 6},
+  {12444, 2314, 8},
+  {7004, 1599, 5},
+  {8932, 1211, 2},
+  {12322, 1522, 4},
+  {4052, 2344, 2},
+  {9806, 1112, 9},
+  {10000, 1234, 5}
+};
+
+int threshold[3] = {10000, 1500, 5};
+String password = "abcdefg";
+int emergencyAlarm = 0;
+
 
 //############# Game Points #############//
 void update_points(){
@@ -148,10 +165,13 @@ bool alreadyMet(int id){
     return false;
 }
 
-void meet_add(int id){
-    today_friend.push_back(id);
-    today_meet_count++;
+bool meet_add(int id){
+    if(alreadyMet(id)){
+        today_friend.push_back(id);
+        today_meet_count++;
 }
+
+
 
 //############# Water Drinking #############//
 float prev_water_level;

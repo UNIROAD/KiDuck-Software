@@ -51,12 +51,14 @@ void showScreen(){
     case 9:   syncApp_9_10();
               screenSwitchMap(0);
               showScreen();         break;
-    case 11:  syncBottle_11();      break;
-    case 12:  friendMeet_12();      break;
-    case 13:  friendMeet_13_14(SEND_MODE);
+    case 11:  syncBottle_11_12(); 
               screenSwitchMap(0);
               showScreen();         break;
-    case 14:  friendMeet_13_14(RECV_MODE);
+    case 13:  friendMeet_13();      break;
+    case 14:  friendMeet_14_15(SEND_MODE);
+              screenSwitchMap(0);
+              showScreen();         break;
+    case 15:  friendMeet_14_15(RECV_MODE);
               screenSwitchMap(0);
               showScreen();         break;
     case -1:  blankScreen();        break;
@@ -75,7 +77,7 @@ void screenSwitchHook(){
 }
 
 
-long long smap[] = {1201, 5040302, 11109, 1, 1, 1, 7, 8, 0, 10, 2, 2, 141300, 12, 12};
+long long smap[] = {1301, 5040302, 11109, 1, 1, 1, 7, 8, 0, 10, 2, 12, 2, 151400, 13, 13};
 void screenSwitchMap(int next){
   screenSwitchHook();
   screen = (int)(smap[screen]%((long long)ceil(pow(100, next+1)))/((long long)ceil(pow(100, next))));
@@ -87,13 +89,13 @@ void actionMap(int event_type){
     case 3:
       switch(screen){
         case 0:   growth=(growth+1)%3;                      break; // delete this later
-        case 12:  screenSwitchMap(1);                       break;
+        case 13:  screenSwitchMap(1);                       break;
         default:  getScreen()->moveBackward();              break;
       } break;
     case 2:
       switch(screen){
         case 0:   screenSwitchMap(1);                       break;
-        case 12:  screenSwitchMap(2);                       break;
+        case 13:  screenSwitchMap(2);                       break;
         default:  getScreen()->moveForward();               break;
       } break;
     case 1:
@@ -105,7 +107,7 @@ void actionMap(int event_type){
       } break;
     case 0:
       switch(screen){
-        case 0: case 9: case 13: case 14:                   break;
+        case 0: case 9: case 14: case 15:                   break;
         case 1:   screenSwitchMap(4);                       break;
         case 2:   screenSwitchMap(2);                       break;
         default:  screenSwitchMap(0);                       break;

@@ -6,7 +6,8 @@
 #include "Ingame_Mechanics.h"
 #include "Kiduck_utility.h"
 #include "GUI_elements.h"
-#include "Bluetooth.h"
+#include "AppSync.h"
+#include "WaterbottleSync.h"
 #include "Friend_Meet.h"
 
 #ifndef HW_SSD
@@ -200,8 +201,8 @@ void duckDisplay_0(){
   disp.drawText(div2, "  "+user_name, 1, SSD1306_WHITE, 1, 0, DIV_ALGN_R)                           // Name
       .drawText(div2, "point: "+String(points) + " ", 1, SSD1306_WHITE, 1, 1, DIV_ALGN_L)           // Point
       .drawText(div2, "Steps: "+String(today_steps) + " ", 1, SSD1306_WHITE, 1, 2, DIV_ALGN_L)      // Steps
-      .drawText(div2, "Water: "+String((int)today_water) + " ", 1, SSD1306_WHITE, 1, 3, DIV_ALGN_L)      // Water
-      .drawText(div2, "Meet : "+String(today_met_count) + " ", 1, SSD1306_WHITE, 1, 4, DIV_ALGN_L) // Meet
+      .drawText(div2, "Water: "+String((int)today_water) + " ", 1, SSD1306_WHITE, 1, 3, DIV_ALGN_L) // Water
+      .drawText(div2, "Meet : "+String(today_meet_count) + " ", 1, SSD1306_WHITE, 1, 4, DIV_ALGN_L) // Meet
       .navigationBarDisplay(" ", "meet", "menu", " ")
       .display();
 }
@@ -210,17 +211,24 @@ void duckDisplay_0(){
 void syncApp_9_10(){
   textScreen("Synchronizing...");
 
-  bleSetup();
+  appBleSetup();
   while(syncApp());
   
   textScreen("Complete", " ", " ", " ", "<-");
 }
 
-void syncBottle_11(){textScreen("Sync with Bottle", " ", " ", " ", "<-");}
+void syncBottle_11_12(){
+  textScreen("Getting Data...");
 
-void friendMeet_12(){textScreen("Friend Meet", "^", "v", " ", "<-");}
+  bottleBleSetup();
+  while(syncBottle());
 
-void friendMeet_13_14(int mode){
+  textScreen("Sync with Bottle", " ", " ", " ", "<-");
+}
+
+void friendMeet_13(){textScreen("Friend Meet", "^", "v", " ", "<-");}
+
+void friendMeet_14_15(int mode){
   String str = "Friend Meet " + String(mode?"Recv":"Send");
   textScreen(str+" Mode");
   
