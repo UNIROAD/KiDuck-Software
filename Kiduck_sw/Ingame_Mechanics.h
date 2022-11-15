@@ -24,12 +24,12 @@ const int WATER_PT = 100;
 int points = 0;
 
 int today_steps = 0;
-int today_meet_count;
-float today_water;
+int today_meet_count = 0;
+int today_water = 0;
 
-vector<int> step_counts;
-vector<int> meet_count;
-vector<float> water_drink;
+vector<int> step_counts = {};
+vector<int> meet_count = {};
+vector<int> water_drink = {};
 
 
 //############# Game Points #############//
@@ -141,23 +141,17 @@ void meet_reset(){
     today_meet_count = 0;
 }
 
-bool is_not_in(int id){
-    for(int i=0;i<(int)today_friend.size();i++){
-        if(id==today_friend[i]) return false;
-    }
-    return true;
-}
-
-bool meet_add(int id){
-    if(is_not_in(id)){
-        today_friend.push_back(id);
-        today_meet_count++;
-        return true;
+bool alreadyMet(int id){
+    for(int i: today_friend){
+        if(id==i) return true;
     }
     return false;
 }
 
-
+void meet_add(int id){
+    today_friend.push_back(id);
+    today_meet_count++;
+}
 
 //############# Water Drinking #############//
 float prev_water_level;

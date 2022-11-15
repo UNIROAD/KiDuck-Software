@@ -1,14 +1,12 @@
 #define DECODE_NEC 
 #include <IRremote.h>
+#include "Ingame_Mechanics.h"
 
 #ifndef FRNDMEET
 
-#define MAX_FRIEND 20   //최대로 만날 수 있는 친구
 #define SEND_PIN 3      //송신기 3번 핀
 #define RECV_PIN 10     // 수신기 10번 핀
 
-int met_friend[MAX_FRIEND]; //만났던 친구 저장하는 배열
-int today_met_count = 0; //지금까지 만난 친구
 
 void Irsetup(){
   IrSender.begin(SEND_PIN, ENABLE_LED_FEEDBACK); // 송신기 작동 시작
@@ -55,21 +53,13 @@ int recvIr(bool startSend, bool con_cmd, uint8_t sendCom, int sendNum, bool chec
         if(!IrReceiver.decode()) continue;
 
         if(check_new?(IrReceiver.decodedIRData.address!=S_ADDRESS)
-                    :(IrReceiver.decodedIRData.address==met_friend[today_met_count-1])){
+                    :(IrReceiver.decodedIRData.address==today_friend.back())){
             if(IrReceiver.decodedIRData.command == cmd1) return cmd1;
             else if(IrReceiver.decodedIRData.command == cmd2) return cmd2;
         }
         //내가 받아야할 신호가 아니면 다시 수신
         IrReceiver.resume();
     }
-}
-
-bool alreadyMet(){
-    int recv_cmd = IrReceiver.decodedIRData.address;
-    for (int j = 0; j < MAX_FRIEND; j++) {
-        if(recv_cmd == met_friend[j]) return true;
-    }
-    return false;
 }
 
 #define SEND_MODE 0
@@ -86,7 +76,7 @@ int connectComm(int mode){
         case RECV_MODE: //1. Connect command 기다림
             recvIr(false, false, -1, -1, true, COM_CMD, -1);
             //이미 만났던 친구인지 확인       
-            if(alreadyMet()){
+            if(alreadyMet(IrReceiver.decodedIRData.address)){
                 Serial.println("You already met this friend today");
                 looped_send_ir_data(NACK, 2, 4, 200);
                 return -1;
@@ -96,7 +86,7 @@ int connectComm(int mode){
 
         default: break;
     }
-    met_friend[today_met_count++] = IrReceiver.decodedIRData.address; // 주소 저장 & 친구 count + 1 
+    meet_add(IrReceiver.decodedIRData.address); // 주소 저장 & 친구 count + 1 
     Serial.println("Connect!!");
     return 0;
 }
