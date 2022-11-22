@@ -223,7 +223,7 @@ void syncBottle_11_12(){
   bottleBleSetup();
   while(syncBottle());
 
-  textScreen("Sync with Bottle", " ", " ", " ", "<-");
+  textScreen("Complete", " ", " ", " ", "<-");
 }
 
 void friendMeet_13(){textScreen("Friend Meet", "^", "v", " ", "<-");}
